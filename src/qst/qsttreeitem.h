@@ -3,7 +3,7 @@
 ** Copyright (C) 2010 Granin A.S.
 ** Contact: Granin A.S. (graninas@gmail.com)
 **
-** This file is part of the Test module of the QsT SQL Tools.
+** This file is part of the Qst module of the QsT SQL Tools.
 **
 ** GNU Lesser General Public License Usage
 ** Alternatively, this file may be used under the terms of the GNU Lesser
@@ -25,3 +25,46 @@
 ** author (graninas@gmail.com).
 **
 ****************************************************************************/
+
+#ifndef QSTTREEITEM_H
+#define QSTTREEITEM_H
+
+#include <QList>
+#include <QVariant>
+
+
+class QstTreeItem
+{
+public:
+	QstTreeItem();
+	QstTreeItem(const QList<QVariant>& data, QstTreeItem* parent = 0);
+	~QstTreeItem();
+
+
+	void appendChild(QstTreeItem * child);
+	QstTreeItem* child(const int &index);
+	int childCount() const;
+	int colsCount() const;
+	QVariant data (const int &columnIndex) const;
+	QstTreeItem* parent();
+	int row() const;
+
+	QstTreeItem* parentOf(const int &columnToCompare, const QVariant &parentID);
+
+	void clear();
+
+	void setData(const int &columnIndex, const QVariant &data);
+
+	bool hasData(const int &childIndex, const int &columnIndex);
+
+
+private:
+	QList<QstTreeItem*> _childItems;
+	QList<QVariant> _itemData;
+	QstTreeItem* _parent;
+
+
+	QstTreeItem* _parentOf(QstTreeItem* node, const int &columnIndex, const QVariant &parentID);
+};
+
+#endif // QSTTREEITEM_H

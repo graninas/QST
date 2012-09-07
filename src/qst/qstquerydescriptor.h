@@ -3,7 +3,7 @@
 ** Copyright (C) 2010 Granin A.S.
 ** Contact: Granin A.S. (graninas@gmail.com)
 **
-** This file is part of the Test module of the QsT SQL Tools.
+** This file is part of the Qst module of the QsT SQL Tools.
 **
 ** GNU Lesser General Public License Usage
 ** Alternatively, this file may be used under the terms of the GNU Lesser
@@ -25,3 +25,45 @@
 ** author (graninas@gmail.com).
 **
 ****************************************************************************/
+
+#ifndef QSTQUERYDESCRIPTOR_H
+#define QSTQUERYDESCRIPTOR_H
+
+#include "qstglobal.h"
+#include "qstbatch.h"
+
+
+namespace Qst
+{
+
+class QstQueryDescriptor
+{
+private:
+
+	QstBatch		_batch;
+	QueryType	_type;
+	int				_queryNumber;
+
+
+public:
+	QstQueryDescriptor(const QstBatch &batch,
+					   const QueryType &type,
+					   const int &queryNumber);
+
+	QstQueryDescriptor();
+
+	QstBatch		batch() const;
+	void			setBatch(const QstBatch &batch);
+
+	QueryType	queryType() const;
+	void			setQueryType(const QueryType &type);
+
+	int				queryNumber() const;
+	void			setQueryNumber(const int &queryNumber);
+
+};
+
+
+};
+
+#endif // QSTQUERYDESCRIPTOR_H

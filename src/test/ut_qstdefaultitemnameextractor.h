@@ -25,3 +25,28 @@
 ** author (graninas@gmail.com).
 **
 ****************************************************************************/
+
+#ifndef UT_QSTDEFAULTITEMNAMEEXTRACTOR_H
+#define UT_QSTDEFAULTITEMNAMEEXTRACTOR_H
+
+#include <QObject>
+#include <QTest>
+
+#include "qst/qstdefaultitemnameextractor.h"
+
+using namespace Qst;
+
+class ut_QstDefaultItemNameExtractor : public QObject
+{
+	Q_OBJECT
+
+public:
+    ut_QstDefaultItemNameExtractor();
+
+private slots:
+
+	void extractItemName();
+	void extractItemName_data();
+};
+
+#endif // UT_QSTDEFAULTITEMNAMEEXTRACTOR_H

@@ -3,7 +3,7 @@
 ** Copyright (C) 2010 Granin A.S.
 ** Contact: Granin A.S. (graninas@gmail.com)
 **
-** This file is part of the QsT SQL Tools.
+** This file is part of the Qst module of the QsT SQL Tools.
 **
 ** GNU Lesser General Public License Usage
 ** Alternatively, this file may be used under the terms of the GNU Lesser
@@ -26,40 +26,68 @@
 **
 ****************************************************************************/
 
-#include <QTest>
-#include "test/ut_qstvalue.h"
-#include "test/ut_qstfield.h"
-#include "test/ut_qstbatch.h"
-#include "test/ut_qstquerygenerator.h"
-#include "test/ut_qstdefaultitemnameextractor.h"
+#include "qstquerygenerator.h"
+#include "qstquerycomposer.h"
 
-
-int main(int argc, char *argv[])
+namespace Qst
 {
-	QCoreApplication app(argc, argv);
-	int res;
 
-	ut_QstValue tc_QstValue;
-		res = QTest::qExec(&tc_QstValue, argc, argv);
-		Q_ASSERT(res == 0);
 
-	ut_QstField tc_QstField;
-		res = QTest::qExec(&tc_QstField, argc, argv);
-		Q_ASSERT(res == 0);
+QstQueryGenerator::QstQueryGenerator()
+	:
+	_batch(QstBatch()),
+	_queryType(QuerySelect)
+{
+}
 
-	ut_QstBatch tc_Batch;
-		res = QTest::qExec(&tc_Batch, argc, argv);
-		Q_ASSERT(res == 0);
-
-	ut_QstQueryGenerator tc_QueryGenerator;
-		res = QTest::qExec(&tc_QueryGenerator, argc, argv);
-		Q_ASSERT(res == 0);
-
-	ut_QstDefaultItemNameExtractor tc_DefaultItemNameExtractor;
-		res = QTest::qExec(&tc_DefaultItemNameExtractor, argc, argv);
-		Q_ASSERT(res == 0);
-
-	return res;
+QstQueryGenerator::QstQueryGenerator(const QstBatch &batch, const QueryType &queryType)
+	:
+	_batch(batch),
+	_queryType(queryType)
+{
 }
 
 
+
+
+QstBatch QstQueryGenerator::batch() const
+{
+	return _batch;
+}
+
+QueryType QstQueryGenerator::queryType() const
+{
+	return _queryType;
+}
+
+bool QstQueryGenerator::isValid() const
+{
+	return _batch.isValid();
+}
+
+QString QstQueryGenerator::query() const
+{
+	if (!isValid())
+		return QString();
+
+	QstQueryComposer composer;
+
+	QStringList sources = _batch.sources();
+
+	for (int i = 0; i < sources.size(); ++i)
+		composer.addSource(sources[i]);
+
+	QstFieldsVector selectClauseFields = _batch.fields(PurposeSelect);
+	QstFieldsVector stuffFields = _batch.fields(PurposeAllButSelect_Mask);
+
+	for (int i = 0; i < selectClauseFields.size(); ++i)
+		composer.addSelectClauseField(selectClauseFields[i]);
+
+	for (int i = 0; i < stuffFields.size(); ++i)
+		composer.addStuffField(stuffFields[i]);
+
+return composer.query(_queryType);
+}
+
+
+}

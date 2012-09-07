@@ -3,7 +3,7 @@
 ** Copyright (C) 2010 Granin A.S.
 ** Contact: Granin A.S. (graninas@gmail.com)
 **
-** This file is part of the QsT SQL Tools.
+** This file is part of the Test module of the QsT SQL Tools.
 **
 ** GNU Lesser General Public License Usage
 ** Alternatively, this file may be used under the terms of the GNU Lesser
@@ -26,40 +26,67 @@
 **
 ****************************************************************************/
 
+#ifndef UT_QSTVALUE_H
+#define UT_QSTVALUE_H
+
+#include <QObject>
 #include <QTest>
-#include "test/ut_qstvalue.h"
-#include "test/ut_qstfield.h"
-#include "test/ut_qstbatch.h"
-#include "test/ut_qstquerygenerator.h"
-#include "test/ut_qstdefaultitemnameextractor.h"
+
+#include "qst/qstvalue.h"
+
+using namespace Qst;
 
 
-int main(int argc, char *argv[])
+class ut_QstValue : public QObject
 {
-	QCoreApplication app(argc, argv);
-	int res;
+	Q_OBJECT
 
-	ut_QstValue tc_QstValue;
-		res = QTest::qExec(&tc_QstValue, argc, argv);
-		Q_ASSERT(res == 0);
+public:
+	ut_QstValue();
 
-	ut_QstField tc_QstField;
-		res = QTest::qExec(&tc_QstField, argc, argv);
-		Q_ASSERT(res == 0);
+private slots:
 
-	ut_QstBatch tc_Batch;
-		res = QTest::qExec(&tc_Batch, argc, argv);
-		Q_ASSERT(res == 0);
+	void isValid();
+	void isValid_data();
 
-	ut_QstQueryGenerator tc_QueryGenerator;
-		res = QTest::qExec(&tc_QueryGenerator, argc, argv);
-		Q_ASSERT(res == 0);
+	void isNull();
+	void isNull_data();
 
-	ut_QstDefaultItemNameExtractor tc_DefaultItemNameExtractor;
-		res = QTest::qExec(&tc_DefaultItemNameExtractor, argc, argv);
-		Q_ASSERT(res == 0);
+	void value();
+	void value_data();
 
-	return res;
-}
+	void functor();
+	void functor_data();
 
+	void braces();
+	void braces_data();
 
+	void toString();		// ValueUnbordered,		NullFilled, NotUseBraces
+	void toString_data();
+
+	void toString1();		// ValueBordered, NullFilled, NotUseBraces
+	void toString1_data();
+
+	void toString2();		// ValueUnbordered,		NotNullFilled, NotUseBraces
+	void toString2_data();
+
+	void toString3();		// ValueBordered, NotNullFilled, NotUseBraces
+	void toString3_data();
+
+// -------------------------------------------------------------------------- //
+
+	void toString4();		// ValueUnbordered,		NullFilled, UseBraces
+	void toString4_data();
+
+	void toString5();		// ValueBordered, NullFilled, UseBraces
+	void toString5_data();
+
+	void toString6();		// ValueUnbordered,		NotNullFilled, UseBraces
+	void toString6_data();
+
+	void toString7();		// ValueBordered, NotNullFilled, UseBraces
+	void toString7_data();
+
+};
+
+#endif // UT_QSTVALUE_H

@@ -25,3 +25,81 @@
 ** author (graninas@gmail.com).
 **
 ****************************************************************************/
+
+#ifndef UT_QSTFIELD_H
+#define UT_QSTFIELD_H
+
+#include <QObject>
+#include <QTest>
+
+#include "qst/qstfield.h"
+using namespace Qst;
+
+class ut_QstField : public QObject
+{
+	Q_OBJECT
+
+public:
+	ut_QstField();
+
+private slots:
+
+	void name();
+	void name_data();
+
+	void visibility();
+	void visibility_data();
+
+	void columnTitle();
+	void columnTitle_data();
+
+	void orientation();
+	void orientation_data();
+
+	void purposes();
+	void purposes_data();
+
+	void role();
+	void role_data();
+
+	void value();
+	void value_data();
+
+	void value1();
+	void value1_data();
+
+	void value2();
+	void value2_data();
+
+	void hasValue();
+	void hasValue_data();
+
+	void hasValue1();
+	void hasValue1_data();
+
+	void hasValue2();
+	void hasValue2_data();
+
+	void isBinaryFilter();
+	void isBinaryFilter_data();
+
+	void isVisible();
+	void isVisible_data();
+
+	void isInvisible();
+	void isInvisible_data();
+
+	void isNoneVisibility();
+	void isNoneVisibility_data();
+
+	void isService();
+	void isService_data();
+
+	void isValuesValid();
+	void isValuesValid_data();
+
+	void isValid();
+	void isValid_data();
+};
+
+#endif // UT_QSTFIELD_H

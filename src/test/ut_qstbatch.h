@@ -25,3 +25,54 @@
 ** author (graninas@gmail.com).
 **
 ****************************************************************************/
+
+#ifndef UT_QSTBATCH_H
+#define UT_QSTBATCH_H
+
+#include <QObject>
+#include <QTest>
+
+#include "qst/qstbatch.h"
+
+using namespace Qst;
+
+
+class ut_QstBatch : public QObject
+{
+	Q_OBJECT
+
+public:
+	ut_QstBatch();
+
+private slots:
+
+	void initTestCase();
+
+	void sources();
+	void sources_data();
+
+	void selectClauseFields();
+	void selectClauseFields_data();
+
+	void stuffFields();
+	void stuffFields_data();
+
+	void fields();
+	void fields_data();
+
+	void columnIndex1();
+	void columnIndex1_data();
+
+	void columnIndex2();
+	void columnIndex2_data();
+
+	void isValid();
+	void isValid_data();
+
+
+private:
+
+	QstBatch m_b1, m_b2, m_b3, m_b4, m_b5, m_b6;
+};
+
+#endif // UT_QSTBATCH_H

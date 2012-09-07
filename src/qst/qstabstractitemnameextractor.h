@@ -3,7 +3,7 @@
 ** Copyright (C) 2010 Granin A.S.
 ** Contact: Granin A.S. (graninas@gmail.com)
 **
-** This file is part of the Test module of the QsT SQL Tools.
+** This file is part of the Qst module of the QsT SQL Tools.
 **
 ** GNU Lesser General Public License Usage
 ** Alternatively, this file may be used under the terms of the GNU Lesser
@@ -25,3 +25,26 @@
 ** author (graninas@gmail.com).
 **
 ****************************************************************************/
+
+#ifndef QSTABSTRACTITEMNAMEEXTRACTOR_H
+#define QSTABSTRACTITEMNAMEEXTRACTOR_H
+
+#include <QString>
+
+namespace Qst
+{
+
+class QstAbstractItemNameExtractor
+{
+public:
+    QstAbstractItemNameExtractor();
+	QstAbstractItemNameExtractor(const QString &str);
+	virtual ~QstAbstractItemNameExtractor() = 0;
+
+	virtual QString extractItemName() const;
+	virtual QString extractItemName(const QString &str) const;
+};
+
+}
+
+#endif // QSTABSTRACTITEMNAMEEXTRACTOR_H

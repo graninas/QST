@@ -1,0 +1,92 @@
+0.3 beta to 0.4 pre-alpha Changes
+
+- Рефакторинг имен
+  Принята система именования, основанная на системе именования Qt 4.x. Переименованы классы, методы, перечисления, типы.
+
+>   Functor                   CompareFunctor
+>   fo_equal                  FunctorEqual
+>   fb_left                   BracesLeft
+>   bvo_first                 OrderFirst
+>   SqlQueryTypes             QueryType
+>   sql_select                QuerySelect
+>   SqlFieldVisibility        FieldVisibility
+>   fv_visible                FieldVisible
+>   SqlFieldPurpose           FieldPurpose
+>   SqlFieldPurposes          FieldPurposes
+>   fp_select                 PurposeSelect
+>   fp_all_valued             PurposeAllValued_Mask
+>   SqlFieldRoles             FieldRole
+>   fr_id                     RolePrimaryKey
+>   fr_parent                 RoleParentKey
+>   SqlValueUseBraces         FuzzyBracesUsage
+>   vub_use                   BracesUse
+>   nt_null                   Null
+>   SqlValueFillNull          NullSubstitution
+>   vfn_fill                  NullSubstitute
+>   SqlQueryModelTypes        ModelType
+>   mt_plain                  ModelPlain
+>   SqlValueBorderIgnoring    <Устранен>
+
+// Основные перечисления пока остались в файле "qstglobal.h". В ходе работы над QST 0.4 рассматриваю варианты, в какой класс перечисления могут быть перенесены.
+
+> namespace Sql           namespace Qst
+> SqlClassName            QstClassName
+> SqlGen                  QstQueryGenerator
+> Cyrillic                QstTextCodec
+> DBConnection            QstDBConnection
+> SqlQueryModel           QstPlainQueryModel
+> SqlTreeModel            QstTreeQueryModel
+> TreeItem                QstTreeItem       // Класс будет пересмотрен.
+> AbstractModelHandler    QstAbstractModelHandler
+
+Другие изменения.
+
+- define'ы глобальных параметров (таких как SQL_VALUE_SET_DEFAULT_FUNCTORS) переименованы и перенесены в файл "qstglobal.h" .
+- Добавлены маски для FieldPurposes (PurposeAll_Mask, PurposeAllButSelect_Mask).
+- Удален параметр borderIgnoring класса QstValue в связи с неочевидностью и явным нарушением ответственности классов.
+- Удален конструктор QstValue::QstValue(QstValue, BorderIgnoring).
+- Удален конструктор QstValue::QstValue(QVariant, BorderIgnoring, CompareFunctor, FuzzyBraces).
+- Создан конструктор QstField::QstField(FieldRoles, QString, FieldVisibility, const char *, int, Qt::Orientation).
+- Изменен главный конструктор, из него изъята роль поля: QstField::QstField(QString, FieldVisibility, const char *, int, Qt::Orientation).
+
+-= QstAbstractModelHandler =-
+- Устранено понятие источника данных, из-за чего одни методы переименованы, другие устранены, третьи потеряли часть параметров.
+>     reloadSource(QString, int, SqlQueryModel*, QSqlDatabase = <default>)
+>>>   reload(int, QstPlainQueryModel*, QSqlDatabase = <default>)
+
+>     setTableView(QString, QTableView*)
+>>>   setTableView(QTableView*)
+
+>     keyValueOfView(QString, viewIndex = <default>)
+>>>   keyValueOfView(QString, viewIndex = <default>)
+
+>     queryDescriptor()  (устранен)
+
+>     cpModel() const;
+>>>   pMoedel() const;
+
+> (и др.)
+
+// Методы класса будут пересматриваться и дальше.
+
+- Создан класс QstAbstractItemNameExtractor, предназначенный для извлечения имени объекта в конструкциях вида "count([ID])"; "field AS FieldName"; "max(field) as [count]", "tableName AS alias". Класс задает интерфейс для создания собственных классов, реализующих извлечение имени.
+- Создан класс QstDefaultItemNameExtractor, так же создан модульный тест для него - ut_QstDefaultItemNameExtractor.
+- Класс QstBatch теперь позволяет загрузить любой класс типа QstAbstractItemNameExtractor. Если в методах указать, что требуется извлечение имени, то будет задействован этот класс. По умолчанию загружается QstDefaultItemNameExtractor.
+
+-= QstBatch =-
+>>>   QstBatch(QstAbstractItemNameExtractor *)
+
+>     columnIndex(QString)
+>>>   columnIndex(QString, bool extractItemName = false)
+
+>     addField(SqlField)
+>>>   addField(QstField, bool extractItemName = <default>) // Зависит от параметра QST_ALWAYS_EXTRACT_ITEM_NAME, по умолчанию - true.
+
+>     fields()
+>     selectClauseFields()
+>     stuffFields()
+>>>   fields(FieldPurposes = <default>)
+
+
+
+! Документация на данный момент остается от версии 0.3.

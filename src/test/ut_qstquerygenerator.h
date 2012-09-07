@@ -25,3 +25,42 @@
 ** author (graninas@gmail.com).
 **
 ****************************************************************************/
+
+#ifndef UT_QSTQUERYGENERATOR_H
+#define UT_QSTQUERYGENERATOR_H
+
+#include <QObject>
+#include <QTest>
+
+#include "qst/qstquerygenerator.h"
+
+using namespace Qst;
+
+class ut_QstQueryGenerator : public QObject
+{
+	Q_OBJECT
+public:
+	ut_QstQueryGenerator();
+
+private slots:
+
+	void initTestCase();
+
+	void query();
+	void query_data();
+
+	void batch();
+	void batch_data();
+
+	void queryType();
+	void queryType_data();
+
+	void isValid();
+	void isValid_data();
+
+private:
+
+	QstBatch m_b1, m_b2, m_b3, m_b4, m_b5, m_b6;
+};
+
+#endif // UT_QSTQUERYGENERATOR_H
