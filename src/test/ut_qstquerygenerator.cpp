@@ -1,5 +1,5 @@
 /****************************************************************************
-** QST 0.4.2a rc
+** QST 0.4.2a release
 ** Copyright (C) 2010 Granin A.S.
 ** Contact: Granin A.S. (graninas@gmail.com)
 **
@@ -32,6 +32,7 @@ using namespace Qst;
 
 Q_DECLARE_METATYPE(QstQueryGenerator)
 Q_DECLARE_METATYPE(QstBatch)
+Q_DECLARE_METATYPE(QueryClauseMap)
 Q_DECLARE_METATYPE(QueryType)
 
 namespace QstTest
@@ -64,7 +65,6 @@ void ut_QstQueryGenerator::initTestCase()
 	m_b4.addSource("Tetha");
 	m_b4	<< QstField("Field1", FieldInvisible, "Поле1", 20)
 			<< QstField("Field4", FieldInvisible, "Поле2", 20);
-
 
 	m_b5.addSource("vSomeSource");
 	m_b5	<< QstField(RolePrimaryKey, "ID", FieldVisible)
@@ -172,8 +172,141 @@ void ut_QstQueryGenerator::query_data()
 	QTest::newRow("32")	<< 	T(m_b7, QuerySelect)	<<  QString("SELECT Name, Key FROM vView");
 	QTest::newRow("33")	<< 	T(m_b8, QuerySelect)	<<  QString("SELECT Name, Key FROM vView WHERE ID = 15");
 	QTest::newRow("34")	<< 	T(m_b9, QuerySelect)	<<  QString("SELECT Name, Key FROM vView");
-
 }
+
+
+void ut_QstQueryGenerator::queryPartsClauseSelect()
+{
+	QFETCH(QstQueryGenerator, gen);
+	QFETCH(QueryClauseMap, result);
+
+	QCOMPARE(gen.queryParts(ClauseSelect), result);
+}
+
+void ut_QstQueryGenerator::queryPartsClauseSelect_data()
+{
+	QTest::addColumn<QstQueryGenerator>("gen");
+	QTest::addColumn<QueryClauseMap>("result");
+
+	QueryClauseMap map;
+
+	map[ClauseSelect] = "SELECT";
+	QTest::newRow("1")	<< 	T(m_b1, QuerySelect)	<<  map;
+	QTest::newRow("7")	<< 	T(m_b2, QuerySelect)	<<  map;
+
+	map[ClauseSelect] = "SELECT Field4";
+	QTest::newRow("12")	<< 	T(m_b3, QuerySelect)	<<  map;
+
+	map[ClauseSelect] = "SELECT Field1, Field4";
+	QTest::newRow("17")	<< 	T(m_b4, QuerySelect)	<<  map;
+
+	map[ClauseSelect] = "SELECT ID, Parent_ID, Field1, Field2, Field3, Field3";
+	QTest::newRow("22")	<< 	T(m_b5, QuerySelect)	<<  map;
+
+	map[ClauseSelect] = "SELECT Field1, Field3, ID, Parent_ID, Field2, Field3";
+	QTest::newRow("27")	<< 	T(m_b6, QuerySelect)	<<  map;
+
+	map[ClauseSelect] = "SELECT Name, Key";
+	QTest::newRow("32")	<< 	T(m_b7, QuerySelect)	<<  map;
+}
+
+void ut_QstQueryGenerator::queryPartsClauseFrom()
+{
+	QFETCH(QstQueryGenerator, gen);
+	QFETCH(QueryClauseMap, result);
+
+	QCOMPARE(gen.queryParts(ClauseFrom), result);
+}
+
+void ut_QstQueryGenerator::queryPartsClauseFrom_data()
+{
+	QTest::addColumn<QstQueryGenerator>("gen");
+	QTest::addColumn<QueryClauseMap>("result");
+
+	QueryClauseMap map;
+
+	map[ClauseFrom] = "FROM";
+	QTest::newRow("1")	<< 	T(m_b1, QuerySelect)	<<  map;
+
+	map[ClauseFrom] = "FROM Source1, Source2";
+	QTest::newRow("7")	<< 	T(m_b2, QuerySelect)	<<  map;
+
+	map[ClauseFrom] = "FROM xSource";
+	QTest::newRow("12")	<< 	T(m_b3, QuerySelect)	<<  map;
+
+	map[ClauseFrom] = "FROM Tetha";
+	QTest::newRow("17")	<< 	T(m_b4, QuerySelect)	<<  map;
+
+	map[ClauseFrom] = "FROM vSomeSource";
+	QTest::newRow("22")	<< 	T(m_b5, QuerySelect)	<<  map;
+
+	map[ClauseFrom] = "FROM vView";
+	QTest::newRow("27")	<< 	T(m_b6, QuerySelect)	<<  map;
+	QTest::newRow("32")	<< 	T(m_b7, QuerySelect)	<<  map;
+}
+
+void ut_QstQueryGenerator::queryPartsClauseWhere()
+{
+	QFETCH(QstQueryGenerator, gen);
+	QFETCH(QueryClauseMap, result);
+
+	QCOMPARE(gen.queryParts(ClauseWhere), result);
+}
+
+void ut_QstQueryGenerator::queryPartsClauseWhere_data()
+{
+	QTest::addColumn<QstQueryGenerator>("gen");
+	QTest::addColumn<QueryClauseMap>("result");
+
+	QueryClauseMap map;
+
+	map[ClauseWhere] = "";
+	QTest::newRow("1")	<< 	T(m_b1, QuerySelect)	<<  map;
+
+	map[ClauseWhere] = "";
+	QTest::newRow("7")	<< 	T(m_b2, QuerySelect)	<<  map;
+
+	map[ClauseWhere] = "";
+	QTest::newRow("12")	<< 	T(m_b3, QuerySelect)	<<  map;
+
+	map[ClauseWhere] = "";
+	QTest::newRow("17")	<< 	T(m_b4, QuerySelect)	<<  map;
+
+	map[ClauseWhere] = "WHERE Field2 IS NULL AND Field3 < 10 AND Field4 LIKE '%some string%' AND Field5 = 'other string%'";
+	QTest::newRow("22")	<< 	T(m_b5, QuerySelect)	<<  map;
+
+	map[ClauseWhere] = "WHERE Field3 >= 10 OR Field3 IS NULL AND Field4 BETWEEN convert(datetime, '20.03.2010', 104) AND convert(datetime, '01.04.2010', 104) AND Field5 >= 3.14 OR Field5 IS NULL AND Field6 = true";
+	QTest::newRow("27")	<< 	T(m_b6, QuerySelect)	<<  map;
+
+	map[ClauseWhere] = "";
+	QTest::newRow("32")	<< 	T(m_b7, QuerySelect)	<<  map;
+}
+
+void ut_QstQueryGenerator::queryPartsClauseOrderBy()
+{
+	QFETCH(QstQueryGenerator, gen);
+	QFETCH(QueryClauseMap, result);
+
+	QCOMPARE(gen.queryParts(ClauseOrderBy), result);
+}
+
+void ut_QstQueryGenerator::queryPartsClauseOrderBy_data()
+{
+	QTest::addColumn<QstQueryGenerator>("gen");
+	QTest::addColumn<QueryClauseMap>("result");
+
+	QueryClauseMap map;
+
+	map[ClauseOrderBy] = "";
+	QTest::newRow("1")	<< 	T(m_b1, QuerySelect)	<<  map;
+	QTest::newRow("7")	<< 	T(m_b2, QuerySelect)	<<  map;
+	QTest::newRow("12")	<< 	T(m_b3, QuerySelect)	<<  map;
+	QTest::newRow("17")	<< 	T(m_b4, QuerySelect)	<<  map;
+	QTest::newRow("22")	<< 	T(m_b5, QuerySelect)	<<  map;
+	QTest::newRow("27")	<< 	T(m_b6, QuerySelect)	<<  map;
+	QTest::newRow("32")	<< 	T(m_b7, QuerySelect)	<<  map;
+}
+
 
 void ut_QstQueryGenerator::batch()
 {

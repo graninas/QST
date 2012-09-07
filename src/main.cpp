@@ -1,5 +1,5 @@
 /****************************************************************************
-** QST 0.4.2a rc
+** QST 0.4.2a release
 ** Copyright (C) 2010 Granin A.S.
 ** Contact: Granin A.S. (graninas@gmail.com)
 **
@@ -33,6 +33,7 @@
 #include "test/ut_qstquerygenerator.h"
 #include "test/ut_qstdefaultitemnameextractor.h"
 #include "test/ut_qstabstractmodelhandler.h"
+#include "test/ut_qstconnectionsettings.h"
 
 #include <QCoreApplication>
 
@@ -62,6 +63,10 @@ int main(int argc, char *argv[])
 
 	ut_QstDefaultItemNameExtractor tc_DefaultItemNameExtractor;
 		res = QTest::qExec(&tc_DefaultItemNameExtractor, argc, argv);
+		Q_ASSERT(res == 0);
+
+	ut_QstConnectionSettings tc_ConnectionSettings;
+	res = QTest::qExec(&tc_ConnectionSettings, argc, argv);
 		Q_ASSERT(res == 0);
 
 	ut_QstAbstractModelHandler tc_AbstractModelHandler;

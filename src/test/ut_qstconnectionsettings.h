@@ -26,71 +26,51 @@
 **
 ****************************************************************************/
 
-#ifndef UT_QSTVALUE_H
-#define UT_QSTVALUE_H
+#ifndef UT_QSTCONNECTIONSETTINGS_H
+#define UT_QSTCONNECTIONSETTINGS_H
 
 #include <QObject>
 #include <QTest>
 
-#include "qst/qstvalue.h"
+#include "qst/qstconnectionsettings.h"
 
 namespace QstTest
 {
 
-class ut_QstValue : public QObject
+class ut_QstConnectionSettings : public QObject
 {
 	Q_OBJECT
 
 public:
-	ut_QstValue();
+    ut_QstConnectionSettings();
 
 private slots:
 
-	void isValid();
-	void isValid_data();
+	void initTestCase();
+
+	void hostName();
+	void hostName_data();
+
+	void port();
+	void port_data();
+
+	void databaseName();
+	void databaseName_data();
+
+	void userName();
+	void userName_data();
+
+	void password();
+	void password_data();
 
 	void isNull();
 	void isNull_data();
 
-	void value();
-	void value_data();
+private:
 
-	void functor();
-	void functor_data();
-
-	void braces();
-	void braces_data();
-
-	void toString();		// ValueNotBordered, BracesNotUse, NullNotSubstitute / NullSubstitute (зависит от QST_VALUE_NULL_SUBSTITUTE_BY_DEFAULT)
-	void toString_data();
-
-	void toString1();		// ValueBordered, BracesNotUse, NullSubstitute
-	void toString1_data();
-
-	void toString2();		// ValueNotBordered, BracesNotUse, NullNotSubstitute
-	void toString2_data();
-
-	void toString3();		// ValueBordered, BracesNotUse, NullNotSubstitute
-	void toString3_data();
-
-	void toString4();		// ValueNotBordered, BracesUse, NullSubstitute
-	void toString4_data();
-
-	void toString5();		// ValueBordered, BracesUse, NullSubstitute
-	void toString5_data();
-
-	void toString6();		// ValueNotBordered, BracesUse, NullNotSubstitute
-	void toString6_data();
-
-	void toString7();		// ValueBordered, BracesUse, NullNotSubstitute
-	void toString7_data();
-
-	void toString8();		// ValueNotBordered, BracesNotUse, NullSubstitute
-	void toString8_data();
-
+	Qst::QstConnectionSettings m_cs1, m_cs2, m_cs3;
 };
 
 } // End of namespace QstTest
 
-
-#endif // UT_QSTVALUE_H
+#endif // UT_QSTCONNECTIONSETTINGS_H

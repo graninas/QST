@@ -1,0 +1,12 @@
+0.4.2a rc to 0.4.2a release Changes
+
+- Улучшена стабильность release-сборки внутри класса QstAbstractModelHandler.
+- Функции pModel() классов QstAbstractModelHandler и QstModelDescriptor переименованы в model().
+- В QstModelDescriptor убран код, связанный с QListView - он нигде не использовался, поскольку QListView интерпретируется как QAbstractItemView наравне с QTableView и QTreeView.
+- Функция QstQueryComposer::queryParts() теперь возвращает simplified() строки внутри QueryClauseMap.
+
+- Исправлена ошибка в документации по классу QstQueryGenerator.
+- Добавлен модульный тест ut_QstConnectionSettings.
+- Обновлен модульный тест ut_QstQueryGenerator.
+- Незначительно обновлена документация.
+

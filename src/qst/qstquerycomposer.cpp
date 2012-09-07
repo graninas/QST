@@ -1,5 +1,5 @@
 /****************************************************************************
-** QST 0.4.2a rc
+** QST 0.4.2a release
 ** Copyright (C) 2010 Granin A.S.
 ** Contact: Granin A.S. (graninas@gmail.com)
 **
@@ -180,43 +180,43 @@ QueryClauseMap QstQueryComposer::queryParts(const QueryClauses &clauses) const
 	QueryClauseMap map;
 
 	if (clauses.testFlag(ClauseSelect))
-		map[ClauseSelect] = _SELECT();
+		map[ClauseSelect] = _SELECT().simplified();
 
 	if (clauses.testFlag(ClauseFrom))
-		map[ClauseFrom] = _FROM();
+		map[ClauseFrom] = _FROM().simplified();
 
 	if (clauses.testFlag(ClauseWhere))
-		map[ClauseWhere] = _WHERE();
+		map[ClauseWhere] = _WHERE().simplified();
 
 	if (clauses.testFlag(ClauseInsertInto))
-		map[ClauseInsertInto] = _INSERT();
+		map[ClauseInsertInto] = _INSERT().simplified();
 
 	if (clauses.testFlag(ClauseUpdate))
-		map[ClauseUpdate] = _UPDATE();
+		map[ClauseUpdate] = _UPDATE().simplified();
 
 	if (clauses.testFlag(ClauseOrderBy))
-		map[ClauseOrderBy] = _ORDER_BY();
+		map[ClauseOrderBy] = _ORDER_BY().simplified();
 
 	if (clauses.testFlag(ClauseGroupBy))
-		map[ClauseGroupBy] = _GROUP_BY();
+		map[ClauseGroupBy] = _GROUP_BY().simplified();
 
 	if (clauses.testFlag(ClauseParameters))
-		map[ClauseParameters] = _PARAMETERS();
+		map[ClauseParameters] = _PARAMETERS().simplified();
 
 	if (clauses.testFlag(ClauseHaving))
-		map[ClauseHaving] = _HAVING();
+		map[ClauseHaving] = _HAVING().simplified();
 
 	if (clauses.testFlag(ClauseValues))
-		map[ClauseValues] = _VALUES();
+		map[ClauseValues] = _VALUES().simplified();
 
 	if (clauses.testFlag(ClauseSet))
-		map[ClauseSet] = _SET();
+		map[ClauseSet] = _SET().simplified();
 
 	if (clauses.testFlag(ClauseDelete))
-		map[ClauseDelete] = _DELETE();
+		map[ClauseDelete] = _DELETE().simplified();
 
 	if (clauses.testFlag(ClauseExecute))
-		map[ClauseExecute] = _EXECUTE();
+		map[ClauseExecute] = _EXECUTE().simplified();
 
 	return map;
 }

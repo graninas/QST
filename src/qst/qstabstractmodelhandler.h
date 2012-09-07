@@ -1,5 +1,5 @@
 /****************************************************************************
-** QST 0.4.2a rc
+** QST 0.4.2a release
 ** Copyright (C) 2010 Granin A.S.
 ** Contact: Granin A.S. (graninas@gmail.com)
 **
@@ -149,8 +149,8 @@ public:
 
 // -------------------------------------------------------------------------- //
 
-		virtual QAbstractItemModel *pModel();
-		virtual QAbstractItemModel *pModel() const;
+		virtual QAbstractItemModel *model();
+		virtual QAbstractItemModel *model() const;
 		virtual QstSpecial::QstModelDescriptor	modelDescriptor() const;
 		virtual QstBatch			batch(const QueryType &queryType,
 										  const int &queryNumber);

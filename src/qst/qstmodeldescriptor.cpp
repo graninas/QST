@@ -1,5 +1,5 @@
 /****************************************************************************
-** QST 0.4.2a rc
+** QST 0.4.2a release
 ** Copyright (C) 2010 Granin A.S.
 ** Contact: Granin A.S. (graninas@gmail.com)
 **
@@ -62,13 +62,13 @@ namespace QstSpecial
 	}
 
 	/*! Возвращает указатель на модель данных. */
-	QAbstractItemModel *QstModelDescriptor::pModel()
+	QAbstractItemModel *QstModelDescriptor::model()
 	{
 		return _model;
 	}
 
 	/*! Возвращает константный указатель на модель данных. */
-	QAbstractItemModel *QstModelDescriptor::pModel() const
+	QAbstractItemModel *QstModelDescriptor::model() const
 	{
 		return _model;
 	}
@@ -152,7 +152,6 @@ namespace QstSpecial
 		demodelizeViews();
 		_views.clear();
 		_comboBoxes.clear();
-		_listViews.clear();
 
 		_viewsCurrentIndexes.clear();
 		_comboBoxesCurrentIndexes.clear();
@@ -177,11 +176,6 @@ namespace QstSpecial
 			_comboBoxes[i]->setModel(_model);
 			_comboBoxes[i]->setCurrentIndex(_comboBoxesCurrentIndexes[i]);
 		}
-
-		for (int i = 0; i < _listViews.size(); ++i)
-		{
-			_listViews[i]->setModel(_model);
-		}
 	}
 
 	/*! Отвязывает модель от представления.
@@ -200,11 +194,6 @@ namespace QstSpecial
 		{
 			_comboBoxesCurrentIndexes[i] = _comboBoxes[i]->currentIndex();
 			_comboBoxes[i]->setModel(NULL);
-		}
-
-		for (int i = 0; i < _listViews.size(); ++i)
-		{
-			_listViews[i]->setModel(NULL);
 		}
 	}
 

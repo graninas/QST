@@ -1,5 +1,5 @@
 /****************************************************************************
-** QST 0.4.2a rc
+** QST 0.4.2a release
 ** Copyright (C) 2010 Granin A.S.
 ** Contact: Granin A.S. (graninas@gmail.com)
 **
@@ -32,7 +32,7 @@ namespace Qst
 {
 
 	/*!
-	\class QstQueryComposer
+	\class QstQueryGenerator
 	\brief
 		Класс отвечает за генерацию всего SQL-запроса по переданным
 		в него QstBatch и типу запроса QueryType.

@@ -1,5 +1,5 @@
 /****************************************************************************
-** QST 0.4.2a rc
+** QST 0.4.2a release
 ** Copyright (C) 2010 Granin A.S.
 ** Contact: Granin A.S. (graninas@gmail.com)
 **
@@ -35,7 +35,6 @@ namespace Qst
 		\brief
 		Контейнер для DFD-описателей. В QstBatch передаются объекты QstField,
 		которые затем используются для генерации разных секций SQL-запроса.
-
 		\inmodule Qst
 
 		Примеры генерируемых запросов по описателям.
@@ -155,7 +154,7 @@ void QstBatch::addSource(const QstSourceIf &sourceIf)
 */
 void QstBatch::addField(const QstField &field, const bool &extractItemName)
 {
-		QString		resFieldName = field.name();
+	QString		resFieldName = field.name();
 
 	_fields.append(field);
 
@@ -293,9 +292,8 @@ int QstBatch::columnIndex(const QString &fieldName, const bool &extractItemName)
 		return visFields.indexOf(resFieldName);
 
 	if(invisFields.contains(resFieldName))
-	{
 		return visFields.size() + invisFields.indexOf(resFieldName);
-	}
+
 return -1;
 }
 

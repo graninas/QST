@@ -1,5 +1,5 @@
 /****************************************************************************
-** QST 0.4.2a rc
+** QST 0.4.2a release
 ** Copyright (C) 2010 Granin A.S.
 ** Contact: Granin A.S. (graninas@gmail.com)
 **
@@ -49,6 +49,18 @@ private slots:
 
 	void query();
 	void query_data();
+
+	void queryPartsClauseSelect();
+	void queryPartsClauseSelect_data();
+
+	void queryPartsClauseFrom();
+	void queryPartsClauseFrom_data();
+
+	void queryPartsClauseWhere();
+	void queryPartsClauseWhere_data();
+
+	void queryPartsClauseOrderBy();
+	void queryPartsClauseOrderBy_data();
 
 	void batch();
 	void batch_data();

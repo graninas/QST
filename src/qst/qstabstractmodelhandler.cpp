@@ -1,5 +1,5 @@
 /****************************************************************************
-** QST 0.4.2a rc
+** QST 0.4.2a release
 ** Copyright (C) 2010 Granin A.S.
 ** Contact: Granin A.S. (graninas@gmail.com)
 **
@@ -244,9 +244,13 @@ nomenclatureHandler.setComboBox(ui->NomenclatureComboBox);
 		Если модель не была загружена ранее, выдает ошибку. */
 void QstAbstractModelHandler::reload(const QSqlDatabase &db)
 {
-	Q_ASSERT(_loaded);
+	if (!isLoaded())
+	{
+		Q_ASSERT(false);
+		return;
+	}
 
-	_reload(pModel(),
+	_reload(_modelDescriptor.model(),
 			_modelDescriptor.modelType(),
 			_modelDescriptor.queryDescriptor().queryNumber(),
 			false,
@@ -256,7 +260,7 @@ void QstAbstractModelHandler::reload(const QSqlDatabase &db)
 /*! Возвращает true, если модель данных была загружена ранее, и false в противном случае. */
 bool QstAbstractModelHandler::isLoaded() const
 {
-	return _loaded;
+	return _loaded && _modelDescriptor.model() != NULL;
 }
 
 	////////////////////////////////////////////////////////////////////////////////
@@ -268,7 +272,11 @@ bool QstAbstractModelHandler::isLoaded() const
 	список попадают классы QTreeView и QListView. */
 	int QstAbstractModelHandler::setTableView(QTableView * tableView)
 	{
-		Q_ASSERT(tableView != NULL);
+		if (tableView == NULL)
+		{
+			Q_ASSERT(false);
+			return -1;
+		}
 
 		int index = _modelDescriptor.addView(tableView, true);
 
@@ -284,7 +292,11 @@ bool QstAbstractModelHandler::isLoaded() const
 	список попадают классы QTableView и QListView. */
 	int QstAbstractModelHandler::setTreeView(QTreeView * treeView)
 	{
-		Q_ASSERT(treeView != NULL);
+		if (treeView == NULL)
+		{
+			Q_ASSERT(false);
+			return -1;
+		}
 
 		int index = _modelDescriptor.addView(treeView, true);
 
@@ -300,7 +312,11 @@ bool QstAbstractModelHandler::isLoaded() const
 	список попадают классы QTableView и QTreeView. */
 	int QstAbstractModelHandler::setListView(QListView * listView)
 	{
-		Q_ASSERT(listView != NULL);
+		if (listView == NULL)
+		{
+			Q_ASSERT(false);
+			return -1;
+		}
 
 		int index = _modelDescriptor.addView(listView, true);
 
@@ -315,7 +331,11 @@ bool QstAbstractModelHandler::isLoaded() const
 	Возвращает индекс привязанного QComboBox.*/
 	int QstAbstractModelHandler::setComboBox(QComboBox * comboBox)
 	{
-		Q_ASSERT(comboBox != NULL);
+		if (comboBox == NULL)
+		{
+			Q_ASSERT(false);
+			return -1;
+		}
 
 		int index;
 		index = _modelDescriptor.addComboBox(comboBox, true);
@@ -329,8 +349,10 @@ bool QstAbstractModelHandler::isLoaded() const
 	{
 		if (deleteModel)
 		{
-			Q_ASSERT(_modelDescriptor.pModel() != NULL);
-			delete _modelDescriptor.pModel();
+			if (_modelDescriptor.model() != NULL)
+			{
+				delete _modelDescriptor.model();
+			}
 		}
 		_modelDescriptor = QstModelDescriptor();
 		_loaded = false;
@@ -342,7 +364,11 @@ bool QstAbstractModelHandler::isLoaded() const
 		В случае ошибки возвращает -1. */
 	int QstAbstractModelHandler::serviceFieldIndex(const FieldRole &role) const
 	{
-		Q_ASSERT(role != RoleNone);
+		if (role == RoleNone)
+		{
+			Q_ASSERT(false);
+			return -1;
+		}
 
 		return _modelDescriptor.queryDescriptor().batch().columnIndex(role);
 	}
@@ -356,7 +382,7 @@ bool QstAbstractModelHandler::isLoaded() const
 		if (!index.isValid())
 			return QVariant();
 
-		const QAbstractItemModel *model = _modelDescriptor.pModel();
+		const QAbstractItemModel *model = _modelDescriptor.model();
 		const int	keyFieldIndex       = serviceFieldIndex(RolePrimaryKey);
 
 		QModelIndex resIndex = model->index(index.row(), keyFieldIndex, index.parent());
@@ -372,7 +398,10 @@ bool QstAbstractModelHandler::isLoaded() const
 	Если ключевое поле не найдено, возвращает QVariant(). */
 	QVariant QstAbstractModelHandler::keyValueOfRow(const int &row) const
 	{
-		const QAbstractItemModel *model = _modelDescriptor.pModel();
+		if (!isLoaded())
+			return QVariant();
+
+		const QAbstractItemModel *model = _modelDescriptor.model();
 		const int keyFieldIndex         = serviceFieldIndex(RolePrimaryKey);
 
 		QModelIndex resIndex = model->index(row, keyFieldIndex, QModelIndex());
@@ -390,7 +419,11 @@ bool QstAbstractModelHandler::isLoaded() const
 	  возвращает QVariant(). */
 	QVariant QstAbstractModelHandler::keyValueOfCurrent(QAbstractItemView * view) const
 	{
-		Q_ASSERT(view != NULL);
+		if (view == NULL)
+		{
+			Q_ASSERT(false);
+			return QVariant();
+		}
 
 		return keyValueOfRow(view->currentIndex());
 	}
@@ -401,7 +434,11 @@ bool QstAbstractModelHandler::isLoaded() const
 	  возвращает QVariant(). */
 	QVariant QstAbstractModelHandler::keyValueOfCurrent(QComboBox * comboBox) const
 	{
-		Q_ASSERT(comboBox != NULL);
+		if (comboBox == NULL)
+		{
+			Q_ASSERT(false);
+			return QVariant();
+		}
 
 		return keyValueOfRow(comboBox->currentIndex());
 	}
@@ -419,7 +456,11 @@ bool QstAbstractModelHandler::isLoaded() const
 		QAbstractItemView * view;
 		view = _modelDescriptor.view(viewIndex);
 
-		Q_ASSERT(view != NULL);
+		if (view == NULL)
+		{
+			Q_ASSERT(false);
+			return QVariant();
+		}
 
 		return keyValueOfCurrent(view);
 	}
@@ -437,7 +478,11 @@ bool QstAbstractModelHandler::isLoaded() const
 		QComboBox * comboBox;
 		comboBox = _modelDescriptor.comboBox(comboBoxIndex);
 
-		Q_ASSERT(comboBox != NULL);
+		if (comboBox == NULL)
+		{
+			Q_ASSERT(false);
+			return QVariant();
+		}
 
 		return keyValueOfCurrent(comboBox);
 	}
@@ -450,6 +495,11 @@ bool QstAbstractModelHandler::isLoaded() const
 															  const int &viewIndex) const
 	{
 		QAbstractItemView *		view  = _modelDescriptor.view(viewIndex);
+		if (view == NULL)
+		{
+			Q_ASSERT(false);
+			return QVariantList();
+		}
 
 		QModelIndexList indexesList = view->selectionModel()->selectedIndexes();
 
@@ -461,9 +511,7 @@ bool QstAbstractModelHandler::isLoaded() const
 		{
 			if (indexesList[i].column() == keysColumnIndex)
 			{
-#ifdef QT_DEBUG
 				qDebug() << "key = " << i << " value = " << indexesList[i].data();
-#endif
 				keysList.append(indexesList[i].data());
 			}
 		}
@@ -477,7 +525,10 @@ bool QstAbstractModelHandler::isLoaded() const
 	void QstAbstractModelHandler::setValue(const QString &valueName,
 										   const QstValue &value)
 	{
-		Q_ASSERT(!valueName.isEmpty());
+		if (valueName.isEmpty())
+		{
+			qDebug() << "Warring! ValueName is empty.";
+		}
 
 		_valuesMap[valueName] = value;
 	}
@@ -519,8 +570,8 @@ bool QstAbstractModelHandler::isLoaded() const
 		return val;
 	}
 
-	/*! Устанавливает массив значений. Прошлые значения затираются.
-	  \sa valuesMap(), value(), setValue()
+	/*! Устанавливает массив значений QstValueMap. Прошлые значения затираются.
+	  \sa setVariantMap(), valuesMap(), value(), setValue()
 	  */
 	void QstAbstractModelHandler::setValuesMap(const QstValueMap &valuesMap)
 	{
@@ -592,17 +643,18 @@ bool QstAbstractModelHandler::isLoaded() const
 										 const QSqlDatabase &db)
 	{
 		Q_ASSERT(db.isOpen());
+		if (!db.isOpen())
+			return false;
 
 		QstBatch btch = this->_inserter(queryNumber);
 
 		QSqlQuery			query(db);
 
 		QstQueryGenerator gen(btch, QueryInsert);
-#ifdef QT_DEBUG
+
 		qDebug() << "For the Insert function, queryType == QueryInsert ";
 		qDebug() << "and queryNumber == " << queryNumber << " query will be:";
 		qDebug() << gen.query();
-#endif
 
 		if (!query.prepare(gen.query()))
 			return false;
@@ -617,17 +669,17 @@ bool QstAbstractModelHandler::isLoaded() const
 										 const QSqlDatabase &db)
 	{
 		Q_ASSERT(db.isOpen());
+		if (!db.isOpen())
+			return false;
 
 		QstBatch btch = this->_updater(queryNumber);
 
 		QSqlQuery			query(db);
 		QstQueryGenerator gen(btch, QueryUpdate);
 
-#ifdef QT_DEBUG
 		qDebug() << "For the Update function, queryType == QueryUpdate ";
 		qDebug() << "and queryNumber == " << queryNumber << " query will be:";
 		qDebug() << gen.query();
-#endif
 
 		if (!query.prepare(gen.query()))
 			return false;
@@ -642,17 +694,17 @@ bool QstAbstractModelHandler::isLoaded() const
 										 const QSqlDatabase &db)
 	{
 		Q_ASSERT(db.isOpen());
+		if (!db.isOpen())
+			return false;
 
 		QstBatch btch = this->_deleter(queryNumber);
 
 		QSqlQuery			query(db);
 		QstQueryGenerator gen(btch, QueryDelete);
 
-#ifdef QT_DEBUG
 		qDebug() << "For the Delete function, queryType == QueryDelete ";
 		qDebug() << "and queryNumber == " << queryNumber << " query will be:";
 		qDebug() << gen.query();
-#endif
 
 		if (!query.prepare(gen.query()))
 			return false;
@@ -667,17 +719,17 @@ bool QstAbstractModelHandler::isLoaded() const
 									   const QSqlDatabase &db)
 	{
 		Q_ASSERT(db.isOpen());
+		if (!db.isOpen())
+			return false;
 
 		QstBatch btch = this->_executor(queryNumber);
 
 		QSqlQuery	query(db);
 		QstQueryGenerator gen(btch, QueryExecute);
 
-#ifdef QT_DEBUG
 		qDebug() << "For the Exec function, queryType == QueryExecute ";
 		qDebug() << "and queryNumber == " << queryNumber << " query will be:";
 		qDebug() << gen.query();
-#endif
 
 		if (!query.prepare(gen.query()))
 			return false;
@@ -695,15 +747,15 @@ bool QstAbstractModelHandler::isLoaded() const
 	}
 
 	/*! Возвращает указатель на модель данных. */
-	QAbstractItemModel *QstAbstractModelHandler::pModel()
+	QAbstractItemModel *QstAbstractModelHandler::model()
 	{
-		return _modelDescriptor.pModel();
+		return _modelDescriptor.model();
 	}
 
 	/*! Возвращает константный указатель модель данных. */
-	QAbstractItemModel *QstAbstractModelHandler::pModel() const
+	QAbstractItemModel *QstAbstractModelHandler::model() const
 	{
-		return _modelDescriptor.pModel();
+		return _modelDescriptor.model();
 	}
 
 	/*! Возвращает дескриптор модели.
@@ -799,6 +851,8 @@ bool QstAbstractModelHandler::isLoaded() const
 	{
 		Q_ASSERT(model != NULL);
 		Q_ASSERT(db.isOpen());
+		if (model == NULL || !db.isOpen())
+			return;
 
 		_modelType = modelType;
 
@@ -822,6 +876,8 @@ bool QstAbstractModelHandler::isLoaded() const
 										  const QSqlDatabase &db)
 	{
 		Q_ASSERT(db.isOpen());
+		if (!db.isOpen())
+			return;
 
 		if (!_modelDescriptor.isValid())
 		{
@@ -844,9 +900,9 @@ bool QstAbstractModelHandler::isLoaded() const
 			if (!model)
 			{
 				if (modelType == ModelPlain)
-					_loadModel(newQueryDescriptor, (QstPlainQueryModel*)pModel(), db);
+					_loadModel(newQueryDescriptor, (QstPlainQueryModel*)_modelDescriptor.model(), db);
 				else
-					_loadModel(newQueryDescriptor, (QstTreeQueryModel*)pModel(), db);
+					_loadModel(newQueryDescriptor, (QstTreeQueryModel*)_modelDescriptor.model(), db);
 			}
 			else
 			{
@@ -873,11 +929,10 @@ bool QstAbstractModelHandler::isLoaded() const
 											  const QSqlDatabase &db)
 	{
 		QstQueryGenerator gen(descriptor.batch(), descriptor.queryType());
-#ifdef QT_DEBUG
+
 		qDebug() << "For the loadModel function,";
 		qDebug() << "query of type" << descriptor.queryType() << "and number" << descriptor.queryNumber() << "will be:";
 		qDebug() << gen.query();
-#endif
 
 		model->setQuery(gen.query(), db);
 	}
@@ -898,11 +953,10 @@ bool QstAbstractModelHandler::isLoaded() const
 			model->setParentField(parentFieldIndex);
 
 		QstQueryGenerator gen(descriptor.batch(), descriptor.queryType());
-#ifdef QT_DEBUG
+
 		qDebug() << "For the loadModel function,";
 		qDebug() << "query of type" << descriptor.queryType() << "and number" << descriptor.queryNumber() << "will be:";
 		qDebug() << gen.query();
-#endif
 
 		model->setQuery(gen.query(), db);
 	}
@@ -981,14 +1035,16 @@ bool QstAbstractModelHandler::isLoaded() const
 		Q_ASSERT(db.isOpen());
 		Q_ASSERT(descriptor.queryType() == QuerySelect);
 
+		if (!db.isOpen() || descriptor.queryType() != QuerySelect)
+			return QVariant();
+
 		QstPlainQueryModel queryModel;
 
 		QstQueryGenerator gen(descriptor.batch(), descriptor.queryType());
-#ifdef QT_DEBUG
+
 		qDebug() << "For the SelectToValue function,";
 		qDebug() << "query of type" << descriptor.queryType() << "and number" << descriptor.queryNumber() << "will be:";
 		qDebug() << gen.query();
-#endif
 
 		queryModel.setQuery(gen.query(), db);
 
@@ -1014,13 +1070,14 @@ bool QstAbstractModelHandler::isLoaded() const
 	{
 		Q_ASSERT(db.isOpen());
 		Q_ASSERT(descriptor.queryType() == QuerySelect);
+		if (!db.isOpen() || descriptor.queryType() != QuerySelect)
+			return QVariantMap();
 
 		QstQueryGenerator gen(descriptor.batch(), descriptor.queryType());
-#ifdef QT_DEBUG
+
 		qDebug() << "For the SelectToMap function,";
 		qDebug() << "query of type" << descriptor.queryType() << "and number" << descriptor.queryNumber() << "will be:";
 		qDebug() << gen.query();
-#endif
 
 		QstPlainQueryModel	queryModel;
 		queryModel.setQuery(gen.query(), db);

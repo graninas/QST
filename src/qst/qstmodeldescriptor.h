@@ -1,5 +1,5 @@
 /****************************************************************************
-** QST 0.4.2a rc
+** QST 0.4.2a release
 ** Copyright (C) 2010 Granin A.S.
 ** Contact: Granin A.S. (graninas@gmail.com)
 **
@@ -51,7 +51,6 @@ public:
 
 	typedef QList<QAbstractItemView *>	ItemViewListType;
 	typedef QList<QComboBox *>			ComboBoxListType;
-	typedef QList<QListView *>			ListViewListType;
 
 	typedef QVector<int>				CurrentIndexVectorType;
 
@@ -62,7 +61,6 @@ private:
 	QstQueryDescriptor	_queryDescriptor;
 	ItemViewListType	_views;
 	ComboBoxListType	_comboBoxes;
-	ListViewListType	_listViews;
 
 	CurrentIndexVectorType	_viewsCurrentIndexes;
 	CurrentIndexVectorType	_comboBoxesCurrentIndexes;
@@ -74,8 +72,8 @@ public:
 					   const ModelType & modelType,
 					   const QstQueryDescriptor & descriptor);
 
-	QAbstractItemModel *pModel();
-	QAbstractItemModel *pModel() const;
+	QAbstractItemModel *model();
+	QAbstractItemModel *model() const;
 
 	void setModel(QAbstractItemModel* model);
 	int addView(QAbstractItemView *view, const bool &modelize = false);
