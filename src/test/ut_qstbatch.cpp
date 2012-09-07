@@ -1,5 +1,5 @@
 /****************************************************************************
-** QST 0.4.1 pre-alpha
+** QST 0.4.2a beta
 ** Copyright (C) 2010 Granin A.S.
 ** Contact: Granin A.S. (graninas@gmail.com)
 **
@@ -28,16 +28,22 @@
 
 #include "ut_qstbatch.h"
 
+using namespace Qst;
+
 typedef QstBatch T;
 
 Q_DECLARE_METATYPE(QstBatch)
 Q_DECLARE_METATYPE(QstValue)
 Q_DECLARE_METATYPE(QstField)
-Q_DECLARE_METATYPE(QstFieldsVector)
+Q_DECLARE_METATYPE(QstFieldVector)
+
+namespace QstTest
+{
+
 
 /*!
 	\class ut_QstBatch
-	\brief Модульный тест для класса QstBatch. См. ut_qstbatch.cpp .
+	\brief Модульный тест для класса QstBatch.
 */
 
 ut_QstBatch::ut_QstBatch()
@@ -113,7 +119,7 @@ void ut_QstBatch::sources_data()
 void ut_QstBatch::selectClauseFields()
 {
 	QFETCH(QstBatch, batch);
-	QFETCH(QstFieldsVector, result);
+	QFETCH(QstFieldVector, result);
 
 	QCOMPARE(batch.fields(PurposeSelect), result);
 }
@@ -121,20 +127,20 @@ void ut_QstBatch::selectClauseFields()
 void ut_QstBatch::selectClauseFields_data()
 {
 	QTest::addColumn<QstBatch>("batch");
-	QTest::addColumn<QstFieldsVector>("result");
+	QTest::addColumn<QstFieldVector>("result");
 
-	QTest::newRow("1")	<< 	m_b1	<< QstFieldsVector();
-	QTest::newRow("2")	<< 	m_b2	<< QstFieldsVector();
-	QTest::newRow("3")	<< 	m_b3	<< (QstFieldsVector()
+	QTest::newRow("1")	<< 	m_b1	<< QstFieldVector();
+	QTest::newRow("2")	<< 	m_b2	<< QstFieldVector();
+	QTest::newRow("3")	<< 	m_b3	<< (QstFieldVector()
 										<< QstField(RolePrimaryKey, "Field4", FieldVisible, "EngTitle", 100)
 										);
 
-	QTest::newRow("4")	<< 	m_b4	<< (QstFieldsVector()
+	QTest::newRow("4")	<< 	m_b4	<< (QstFieldVector()
 										<< QstField("Field1", FieldInvisible, "РусЗаголовок", 20)
 										<< QstField("Field4", FieldInvisible, "РусЗаголовок2", 20)
 										);
 
-	QTest::newRow("5")	<< 	m_b5	<< (QstFieldsVector()
+	QTest::newRow("5")	<< 	m_b5	<< (QstFieldVector()
 										<< QstField(RolePrimaryKey, "ID", FieldVisible)
 										<< QstField(RoleParentKey, "Parent_ID", FieldVisible)
 										<< QstField("Field1", FieldVisible, "Поле1", 100)
@@ -142,7 +148,7 @@ void ut_QstBatch::selectClauseFields_data()
 										<< QstField("Field3", FieldVisible, "Поле3", 100)
 										);
 
-	QTest::newRow("6")	<< 	m_b6	<< (QstFieldsVector()
+	QTest::newRow("6")	<< 	m_b6	<< (QstFieldVector()
 										<< QstField("Field1", FieldVisible, "ПолеX", 100)
 										<< QstField("Field3", FieldVisible, "ПолеZ", 100)
 										<< QstField(RolePrimaryKey, "ID", FieldInvisible)
@@ -154,7 +160,7 @@ void ut_QstBatch::selectClauseFields_data()
 void ut_QstBatch::stuffFields()
 {
 	QFETCH(QstBatch, batch);
-	QFETCH(QstFieldsVector, result);
+	QFETCH(QstFieldVector, result);
 
 	QCOMPARE(batch.fields(PurposeAllButSelect_Mask), result);
 }
@@ -162,15 +168,15 @@ void ut_QstBatch::stuffFields()
 void ut_QstBatch::stuffFields_data()
 {
 	QTest::addColumn<QstBatch>("batch");
-	QTest::addColumn<QstFieldsVector>("result");
+	QTest::addColumn<QstFieldVector>("result");
 
-	QTest::newRow("1")	<< 	m_b1	<< QstFieldsVector();
-	QTest::newRow("2")	<< 	m_b2	<< (QstFieldsVector());
-	QTest::newRow("3")	<< 	m_b3	<< (QstFieldsVector());
+	QTest::newRow("1")	<< 	m_b1	<< QstFieldVector();
+	QTest::newRow("2")	<< 	m_b2	<< (QstFieldVector());
+	QTest::newRow("3")	<< 	m_b3	<< (QstFieldVector());
 
-	QTest::newRow("4")	<< 	m_b4	<< (QstFieldsVector());
+	QTest::newRow("4")	<< 	m_b4	<< (QstFieldVector());
 
-	QTest::newRow("5")	<< 	m_b5	<< (QstFieldsVector()
+	QTest::newRow("5")	<< 	m_b5	<< (QstFieldVector()
 										<< QstField("Field1", QstValue(), PurposeWhere)
 										<< QstField("Field2", QstValue(Null), PurposeWhere | PurposeInsert)
 										<< QstField("Field3", QstValue(10, FunctorLess), PurposeWhere | PurposeSelect)
@@ -178,7 +184,7 @@ void ut_QstBatch::stuffFields_data()
 										<< QstField("Field5", QstValue(QString("other string"), FunctorEqual, BracesRight), PurposeWhere)
 										);
 
-	QTest::newRow("6")	<< 	m_b6	<< (QstFieldsVector()
+	QTest::newRow("6")	<< 	m_b6	<< (QstFieldVector()
 										<< QstField("Field4", QstValue(QDate(2010, 03, 20)),
 													QstValue(QDate(2010, 04, 1)))
 										<< QstField("Field5", QstValue(3.14, FunctorGreaterEqualOrNull), PurposeWhere | PurposeInsert)
@@ -189,7 +195,7 @@ void ut_QstBatch::stuffFields_data()
 void ut_QstBatch::fields()
 {
 	QFETCH(QstBatch, batch);
-	QFETCH(QstFieldsVector, result);
+	QFETCH(QstFieldVector, result);
 
 	QCOMPARE(batch.fields(), result);
 }
@@ -197,20 +203,20 @@ void ut_QstBatch::fields()
 void ut_QstBatch::fields_data()
 {
 	QTest::addColumn<QstBatch>("batch");
-	QTest::addColumn<QstFieldsVector>("result");
+	QTest::addColumn<QstFieldVector>("result");
 
-	QTest::newRow("1")	<< 	m_b1	<< QstFieldsVector();
-	QTest::newRow("2")	<< 	m_b2	<< (QstFieldsVector()
+	QTest::newRow("1")	<< 	m_b1	<< QstFieldVector();
+	QTest::newRow("2")	<< 	m_b2	<< (QstFieldVector()
 										<< QstField());
 
-	QTest::newRow("3")	<< 	m_b3	<< (QstFieldsVector()
+	QTest::newRow("3")	<< 	m_b3	<< (QstFieldVector()
 										<< QstField(RolePrimaryKey, "Field4", FieldVisible, "EngTitle", 100));
 
-	QTest::newRow("4")	<< 	m_b4	<< (QstFieldsVector()
+	QTest::newRow("4")	<< 	m_b4	<< (QstFieldVector()
 										<< QstField("Field1", FieldInvisible, "РусЗаголовок", 20)
 										<< QstField("Field4", FieldInvisible, "РусЗаголовок2", 20));
 
-	QTest::newRow("5")	<< 	m_b5	<< (QstFieldsVector()
+	QTest::newRow("5")	<< 	m_b5	<< (QstFieldVector()
 										<< QstField(RolePrimaryKey, "ID", FieldVisible)
 										<< QstField(RoleParentKey, "Parent_ID", FieldVisible)
 										<< QstField("Field1", FieldVisible, "Поле1", 100)
@@ -224,7 +230,7 @@ void ut_QstBatch::fields_data()
 										<< QstField("Field5", QstValue(QString("other string"), FunctorEqual, BracesRight), PurposeWhere)
 										);
 
-	QTest::newRow("6")	<< 	m_b6	<< (QstFieldsVector()
+	QTest::newRow("6")	<< 	m_b6	<< (QstFieldVector()
 										<< QstField(RolePrimaryKey, "ID", FieldInvisible)
 										<< QstField(RoleParentKey, "Parent_ID", FieldInvisible)
 										<< QstField("Field1", FieldVisible, "ПолеX", 100)
@@ -301,3 +307,5 @@ void ut_QstBatch::isValid_data()
 	QTest::newRow("5")	<< 	m_b5	<< true;
 	QTest::newRow("6")	<< 	m_b6	<< true;
 }
+
+} // End of namespace QstTest

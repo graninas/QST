@@ -1,5 +1,5 @@
 /****************************************************************************
-** QST 0.4.1 pre-alpha
+** QST 0.4.2a beta
 ** Copyright (C) 2010 Granin A.S.
 ** Contact: Granin A.S. (graninas@gmail.com)
 **
@@ -32,6 +32,7 @@
 #include "qstglobal.h"
 #include <QVariant>
 #include <QVector>
+#include <QMap>
 #include <QDate>
 
 namespace Qst
@@ -46,6 +47,18 @@ public:
 	QstValue(const QVariant &value = QVariant(),
 			 const CompareFunctor &functor = FunctorNone,
 			 const FuzzyBraces &braces = BracesNone);
+
+	// Конструктор с расширенной функциональностью для создания фильтров
+	// на формах, где требуется точное и неточное совпадение строк.
+	// В отличие от предыдущего конструктора создает QstValue только тогда, когда
+	// enable = true. В качестве enabled может быть передан параметр isChecked
+	// от QComboBox.
+	QstValue(const bool &enabled,
+			 const QString &valueString,
+			 const bool &fullStringMatch,
+			 const CompareFunctor &functor = FunctorLike,
+			 const FuzzyBraces &braces = BracesBoth,
+			 const MatchPolicy &matchPolicy = MatchFlagDependent);
 
 	// Создает QstValue на основе другого, при этом изменяет functor и braces.
 	QstValue(const QstValue &other,
@@ -63,10 +76,13 @@ public:
 	FuzzyBraces	braces() const;
 
 	QString		toString(const ValueBordering &bordering = ValueNotBordered,
-						 const NullSubstitution  &fillSqlNull = NullSubstitute,
-						 const FuzzyBracesUsage &useBraces = BracesNotUse) const;
-
-	QVariant	&rValue();
+						 const FuzzyBracesUsage &useBraces = BracesNotUse,
+#ifdef QST_VALUE_NULL_SUBSTITUTE_BY_DEFAULT
+						 const NullSubstitution  &nullSubstitute = NullSubstitute
+#else
+						 const NullSubstitution  &nullSubstitute = NullNotSubstitute
+#endif
+						 ) const;
 
 	void setValue(const QVariant &value);
 	void setFunctor(const CompareFunctor &functor);
@@ -77,10 +93,10 @@ public:
 
 private:
 
-	QVariant _value;
+	QVariant		_value;
 
-	CompareFunctor		_functor;
-	FuzzyBraces	_braces;
+	CompareFunctor	_functor;
+	FuzzyBraces		_braces;
 
 	QString _toString(const QString &strVal,
 					  const ValueBordering &bordering,
@@ -134,7 +150,8 @@ public:
 
 ////////////////////////////////////////////////////////////////////////////////
 
-typedef QVector<QstValue> QstValuesVector;
+typedef QVector<QstValue>			QstValueVector;
+typedef QMap<QString, QstValue>		QstValueMap;
 
 ////////////////////////////////////////////////////////////////////////////////
 

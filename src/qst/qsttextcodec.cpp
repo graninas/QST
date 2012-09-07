@@ -1,5 +1,5 @@
 /****************************************************************************
-** QST 0.4.1 pre-alpha
+** QST 0.4.2a beta
 ** Copyright (C) 2010 Granin A.S.
 ** Contact: Granin A.S. (graninas@gmail.com)
 **
@@ -28,10 +28,26 @@
 
 #include "qsttextcodec.h"
 
+namespace Qst
+{
+
+
+/*!
+	\class QstTextCodec
+	\brief
+	Класс позволяет настроить функцию tr() и установить кодек по имени.
+	для этого достаточно инстанцировать класс с нужным кодеком:
+	QstTextCodec codec("UTF-8");
+
+	\inmodule Qst
+*/
+
 QstTextCodec::QstTextCodec(const QString &codecName)
 {
 	QTextCodec *pTextCodec;
 	pTextCodec = QTextCodec::codecForName(codecName.toAscii());
 	Q_ASSERT_X(pTextCodec != NULL, "codecPointer", "Invalid Codec");
 	QTextCodec::setCodecForTr(pTextCodec);
+}
+
 }

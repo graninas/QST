@@ -1,5 +1,5 @@
 /****************************************************************************
-** QST 0.4.1 pre-alpha
+** QST 0.4.2a beta
 ** Copyright (C) 2010 Granin A.S.
 ** Contact: Granin A.S. (graninas@gmail.com)
 **
@@ -28,6 +28,10 @@
 
 #include "ut_qstvalue.h"
 
+#include <QDebug>
+
+using namespace Qst;
+
 typedef QstValue T;
 
 Q_DECLARE_METATYPE(QstValue)
@@ -35,13 +39,17 @@ Q_DECLARE_METATYPE(QVariant)
 Q_DECLARE_METATYPE(CompareFunctor)
 Q_DECLARE_METATYPE(FuzzyBraces)
 
+namespace QstTest
+{
+
+
 ut_QstValue::ut_QstValue()
 {
 }
 
 /*!
 	\class ut_QstValue
-	\brief Модульный тест для класса QstValue. См. ut_qstvalue.cpp .
+	\brief Модульный тест для класса QstValue.
 */
 
 
@@ -255,7 +263,7 @@ void ut_QstValue::functor_data()
 	QTest::newRow("B7")	<< T(T(10))				<< FunctorEqual;
 
 // Конструктор 4
-	QTest::newRow("C1")	<< T(Null)						<< FunctorIsNull;
+	QTest::newRow("C1")	<< T(Null)				<< FunctorIsNull;
 }
 
 //! Тестирование braces.
@@ -288,7 +296,13 @@ void ut_QstValue::braces_data()
 }
 
 
-//! Тестирование toString с параметрами по умолчанию, а именно: ValueUnbordered, NullFilled, NotUseBraces.
+/** Тестирование toString с параметрами по умолчанию,
+ а именно: ValueNotBordered, BracesNotUse, NullSubstitute,
+ если QST_VALUE_NULL_SUBSTITUTE_BY_DEFAULT определен,
+
+ и			ValueNotBordered, BracesNotUse, NullNotSubstitute,
+ если не определен.
+  */
 
 void ut_QstValue::toString()
 {
@@ -302,6 +316,10 @@ void ut_QstValue::toString_data()
 {
 	QTest::addColumn<QstValue>("value");
 	QTest::addColumn<QString>("result");
+
+#ifdef QST_VALUE_NULL_SUBSTITUTE_BY_DEFAULT
+
+	qDebug() << "Null substituting by default is ON.";
 
 // Конструктор 1
 	QTest::newRow("1")	<< T()					<< QString();
@@ -336,16 +354,56 @@ void ut_QstValue::toString_data()
 
 // Конструктор 4
 	QTest::newRow("C1")	<< T(Null)	<< QString("NULL");
+
+#else
+
+	qDebug() << "Null substituting by default is OFF.";
+
+	// Конструктор 1
+		QTest::newRow("1")	<< T()					<< QString();
+		QTest::newRow("2")	<< T(QVariant())		<< QString();
+		QTest::newRow("3")	<< T(QVariant::Int)		<< QString();
+		QTest::newRow("4")	<< T(QString())			<< QString();
+		QTest::newRow("5")	<< T(QDate())			<< QString();
+		QTest::newRow("6")	<< T(QString("1s"))		<< QString("1s");
+		QTest::newRow("6a")	<< T(QString(""))		<< QString("");
+		QTest::newRow("7")	<< T(true)				<< QString("true");
+		QTest::newRow("8")	<< T(false)				<< QString("false");
+		QTest::newRow("9")	<< T(10)				<< QString("10");
+		QTest::newRow("10")	<< T(QDate(2010,12,13))	<< QString("13.12.2010");
+
+	// Конструктор 2
+		QTest::newRow("A1")	<< T(T(), FunctorNone)				<< QString();
+		QTest::newRow("A2")	<< T(T(), FunctorNone)				<< QString();
+		QTest::newRow("A3")	<< T(T(QVariant::Int), FunctorNone)	<< QString();
+		QTest::newRow("A4")	<< T(T(QString()), FunctorNone)		<< QString();
+		QTest::newRow("A5")	<< T(T(QString("1s")), FunctorNone)	<< QString("1s");
+		QTest::newRow("A6")	<< T(T(true), FunctorNone)			<< QString("true");
+		QTest::newRow("A7")	<< T(T(10), FunctorNone)			<< QString("10");
+
+	// Конструктор 3
+		QTest::newRow("B1")	<< T(T())				<< QString();
+		QTest::newRow("B2")	<< T(T(QVariant()))		<< QString();
+		QTest::newRow("B3")	<< T(T(QVariant::Int))	<< QString();
+		QTest::newRow("B4")	<< T(T(QString()))		<< QString();
+		QTest::newRow("B5")	<< T(T(QString("1s")))	<< QString("1s");
+		QTest::newRow("B6")	<< T(T(true))			<< QString("true");
+		QTest::newRow("B7")	<< T(T(10))				<< QString("10");
+
+	// Конструктор 4
+		QTest::newRow("C1")	<< T(Null)	<< QString();
+
+#endif
 }
 
-//! Тестирование toString1 с параметрами ValueBordered, NullFilled, NotUseBraces.
+//! Тестирование toString1 с параметрами ValueBordered, NullSubstitute, BracesNotUse.
 
 void ut_QstValue::toString1()
 {
 	QFETCH(QstValue, value);
 	QFETCH(QString, result);
 
-	QCOMPARE(value.toString(ValueBordered, NullSubstitute, BracesNotUse), result);
+	QCOMPARE(value.toString(ValueBordered, BracesNotUse, NullSubstitute), result);
 }
 
 void ut_QstValue::toString1_data()
@@ -366,14 +424,14 @@ void ut_QstValue::toString1_data()
 	QTest::newRow("10")	<< T(QDate(2010,12,13))	<< QString("'13.12.2010'");
 }
 
-//! Тестирование toString2 с параметрами ValueBordered, NotNullFilled, NotUseBraces.
+//! Тестирование toString2 с параметрами ValueBordered, NullNotSubstitute, BracesNotUse.
 
 void ut_QstValue::toString2()
 {
 	QFETCH(QstValue, value);
 	QFETCH(QString, result);
 
-	QCOMPARE(value.toString(ValueNotBordered, NullNotSubstitute, BracesNotUse), result);
+	QCOMPARE(value.toString(ValueNotBordered, BracesNotUse, NullNotSubstitute), result);
 }
 
 void ut_QstValue::toString2_data()
@@ -395,14 +453,14 @@ void ut_QstValue::toString2_data()
 }
 
 
-//! Тестирование toString3 с параметрами ValueBordered, NotNullFilled, NotUseBraces.
+//! Тестирование toString3 с параметрами ValueBordered, BracesNotUse, NullNotSubstitute.
 
 void ut_QstValue::toString3()
 {
 	QFETCH(QstValue, value);
 	QFETCH(QString, result);
 
-	QCOMPARE(value.toString(ValueBordered, NullNotSubstitute, BracesNotUse), result);
+	QCOMPARE(value.toString(ValueBordered, BracesNotUse, NullNotSubstitute), result);
 }
 
 void ut_QstValue::toString3_data()
@@ -426,14 +484,14 @@ void ut_QstValue::toString3_data()
 
 // -------------------------------------------------------------------------- //
 
-//! Тестирование toString4 с параметрами ValueUnbordered, NullFilled, UseBraces.
+//! Тестирование toString4 с параметрами ValueNotBordered, BracesUse, NullSubstitute.
 
 void ut_QstValue::toString4()
 {
 	QFETCH(QstValue, value);
 	QFETCH(QString, result);
 
-	QCOMPARE(value.toString(ValueNotBordered, NullSubstitute, BracesUse), result);
+	QCOMPARE(value.toString(ValueNotBordered, BracesUse, NullSubstitute), result);
 }
 
 void ut_QstValue::toString4_data()
@@ -454,14 +512,14 @@ void ut_QstValue::toString4_data()
 	QTest::newRow("10")	<< T(QDate(2010,12,13))	<< QString("%13.12.2010%");
 }
 
-//! Тестирование toString5 с параметрами ValueBordered, NullFilled, UseBraces.
+//! Тестирование toString5 с параметрами ValueBordered, BracesUse, NullSubstitute.
 
 void ut_QstValue::toString5()
 {
 	QFETCH(QstValue, value);
 	QFETCH(QString, result);
 
-	QCOMPARE(value.toString(ValueBordered, NullSubstitute, BracesUse), result);
+	QCOMPARE(value.toString(ValueBordered, BracesUse, NullSubstitute), result);
 }
 
 void ut_QstValue::toString5_data()
@@ -482,14 +540,14 @@ void ut_QstValue::toString5_data()
 	QTest::newRow("10")	<< T(QDate(2010,12,13))	<< QString("'%13.12.2010%'");
 }
 
-//! Тестирование toString6 с параметрами ValueUnbordered, NotNullFilled, UseBraces.
+//! Тестирование toString6 с параметрами ValueNotBordered, BracesUse, NullNotSubstitute.
 
 void ut_QstValue::toString6()
 {
 	QFETCH(QstValue, value);
 	QFETCH(QString, result);
 
-	QCOMPARE(value.toString(ValueNotBordered, NullNotSubstitute, BracesUse), result);
+	QCOMPARE(value.toString(ValueNotBordered, BracesUse, NullNotSubstitute), result);
 }
 
 void ut_QstValue::toString6_data()
@@ -510,14 +568,14 @@ void ut_QstValue::toString6_data()
 	QTest::newRow("10")	<< T(QDate(2010,12,13))	<< QString("%13.12.2010%");
 }
 
-//! Тестирование toString7 с параметрами ValueBordered, NotNullFilled, UseBraces.
+//! Тестирование toString7 с параметрами ValueBordered, BracesUse, NullNotSubstitute.
 
 void ut_QstValue::toString7()
 {
 	QFETCH(QstValue, value);
 	QFETCH(QString, result);
 
-	QCOMPARE(value.toString(ValueBordered, NullNotSubstitute, BracesUse), result);
+	QCOMPARE(value.toString(ValueBordered, BracesUse, NullNotSubstitute), result);
 }
 
 void ut_QstValue::toString7_data()
@@ -537,3 +595,55 @@ void ut_QstValue::toString7_data()
 	QTest::newRow("9")	<< T(10)				<< QString("'%10%'");
 	QTest::newRow("10")	<< T(QDate(2010,12,13))	<< QString("'%13.12.2010%'");
 }
+
+//! Тестирование toString8 с параметрами ValueNotBordered, BracesNotUse, NullSubstitute.
+
+void ut_QstValue::toString8()
+{
+	QFETCH(QstValue, value);
+	QFETCH(QString, result);
+
+	QCOMPARE(value.toString(ValueNotBordered, BracesNotUse, NullSubstitute), result);
+}
+
+void ut_QstValue::toString8_data()
+{
+	QTest::addColumn<QstValue>("value");
+	QTest::addColumn<QString>("result");
+
+	// Конструктор 1
+		QTest::newRow("1")	<< T()					<< QString();
+		QTest::newRow("2")	<< T(QVariant())		<< QString();
+		QTest::newRow("3")	<< T(QVariant::Int)		<< QString("NULL");
+		QTest::newRow("4")	<< T(QString())			<< QString("NULL");
+		QTest::newRow("5")	<< T(QDate())			<< QString("NULL");
+		QTest::newRow("6")	<< T(QString("1s"))		<< QString("1s");
+		QTest::newRow("6a")	<< T(QString(""))		<< QString("");
+		QTest::newRow("7")	<< T(true)				<< QString("true");
+		QTest::newRow("8")	<< T(false)				<< QString("false");
+		QTest::newRow("9")	<< T(10)				<< QString("10");
+		QTest::newRow("10")	<< T(QDate(2010,12,13))	<< QString("13.12.2010");
+
+	// Конструктор 2
+		QTest::newRow("A1")	<< T(T(), FunctorNone)				<< QString();
+		QTest::newRow("A2")	<< T(T(), FunctorNone)				<< QString();
+		QTest::newRow("A3")	<< T(T(QVariant::Int), FunctorNone)	<< QString("NULL");
+		QTest::newRow("A4")	<< T(T(QString()), FunctorNone)		<< QString("NULL");
+		QTest::newRow("A5")	<< T(T(QString("1s")), FunctorNone)	<< QString("1s");
+		QTest::newRow("A6")	<< T(T(true), FunctorNone)			<< QString("true");
+		QTest::newRow("A7")	<< T(T(10), FunctorNone)			<< QString("10");
+
+	// Конструктор 3
+		QTest::newRow("B1")	<< T(T())				<< QString();
+		QTest::newRow("B2")	<< T(T(QVariant()))		<< QString();
+		QTest::newRow("B3")	<< T(T(QVariant::Int))	<< QString("NULL");
+		QTest::newRow("B4")	<< T(T(QString()))		<< QString("NULL");
+		QTest::newRow("B5")	<< T(T(QString("1s")))	<< QString("1s");
+		QTest::newRow("B6")	<< T(T(true))			<< QString("true");
+		QTest::newRow("B7")	<< T(T(10))				<< QString("10");
+
+	// Конструктор 4
+		QTest::newRow("C1")	<< T(Null)	<< QString("NULL");}
+
+
+} // End of namespace QstTest

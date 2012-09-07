@@ -3,7 +3,7 @@
 ** Copyright (C) 2010 Granin A.S.
 ** Contact: Granin A.S. (graninas@gmail.com)
 **
-** This file is part of the Test module of the QsT SQL Tools.
+** This file is part of the Qst module of the QsT SQL Tools.
 **
 ** GNU Lesser General Public License Usage
 ** Alternatively, this file may be used under the terms of the GNU Lesser
@@ -26,47 +26,5 @@
 **
 ****************************************************************************/
 
-#ifndef UT_QSTQUERYGENERATOR_H
-#define UT_QSTQUERYGENERATOR_H
+#include "qstif.h"
 
-#include <QObject>
-#include <QTest>
-
-#include "qst/qstquerygenerator.h"
-
-namespace QstTest
-{
-
-class ut_QstQueryGenerator : public QObject
-{
-	Q_OBJECT
-public:
-	ut_QstQueryGenerator();
-
-private slots:
-
-	void initTestCase();
-
-	void query();
-	void query_data();
-
-	void batch();
-	void batch_data();
-
-	void queryType();
-	void queryType_data();
-
-	void isValid();
-	void isValid_data();
-
-private:
-
-	Qst::QstBatch m_b1, m_b2, m_b3, m_b4, m_b5, m_b6;
-
-	Qst::QstBatch m_b7, m_b8, m_b9;
-};
-
-} // End of namespace QstTest
-
-
-#endif // UT_QSTQUERYGENERATOR_H

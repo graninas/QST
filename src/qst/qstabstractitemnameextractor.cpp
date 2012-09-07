@@ -1,5 +1,5 @@
 /****************************************************************************
-** QST 0.4.1 pre-alpha
+** QST 0.4.2a beta
 ** Copyright (C) 2010 Granin A.S.
 ** Contact: Granin A.S. (graninas@gmail.com)
 **
@@ -31,24 +31,46 @@
 namespace Qst
 {
 
+/*!
+	\class QstAbstractItemNameExtractor
+	\brief
+	Класс описывает интерфейс для извлечения имени поля из произвольного выражения.
 
+	\inmodule Qst
+
+	QstAbstractItemNameExtractor - абстрактный класс. С помощью его функций
+	классы-наследники могут извлекать имя поля из произвольного строкового выражения,
+	используя свои алгоритмы.
+
+*/
+
+/*! Конструктор по умолчанию. */
 QstAbstractItemNameExtractor::QstAbstractItemNameExtractor()
 {
 }
 
+/*! Конструктор, принимающий строковую константу, которая содержит имя поля
+для извлечения. */
 QstAbstractItemNameExtractor::QstAbstractItemNameExtractor(const QString &str)
 {
 }
 
+/*! Чисто виртуальный деструктор. */
 QstAbstractItemNameExtractor::~QstAbstractItemNameExtractor()
 {
 }
 
+/*! Извлекает имя поля из сохраненной ранее строковой константы.
+
+  Виртуальная функция, возвращает QString(). Может быть переписана в классе-наследнике. */
 QString QstAbstractItemNameExtractor::extractItemName() const
 {
 	return QString();
 }
 
+/*! Извлекает имя поля из переданной строковой константы.
+
+  Виртуальная функция, возвращает QString(). Может быть переписана в классе-наследнике. */
 QString QstAbstractItemNameExtractor::extractItemName(const QString &str) const
 {
 	return str;

@@ -1,5 +1,5 @@
 /****************************************************************************
-** QST 0.4.1 pre-alpha
+** QST 0.4.2a beta
 ** Copyright (C) 2010 Granin A.S.
 ** Contact: Granin A.S. (graninas@gmail.com)
 **
@@ -33,7 +33,9 @@
 #include <QTest>
 
 #include "qst/qstfield.h"
-using namespace Qst;
+
+namespace QstTest
+{
 
 class ut_QstField : public QObject
 {
@@ -101,5 +103,8 @@ private slots:
 	void isValid();
 	void isValid_data();
 };
+
+} // End of namespace QstTest
+
 
 #endif // UT_QSTFIELD_H

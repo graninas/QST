@@ -1,5 +1,5 @@
 /****************************************************************************
-** QST 0.4.1 pre-alpha
+** QST 0.4.2a beta
 ** Copyright (C) 2010 Granin A.S.
 ** Contact: Granin A.S. (graninas@gmail.com)
 **
@@ -40,17 +40,16 @@ namespace Qst
 class QstField
 {
 public:
-	// Конструктор по умолчанию.
 	QstField();
 
-	// Конструктор для служебных ключевых полей.
+	// Конструктор для служебных ключевых полей в секции SELECT.
 	// const * char версия для параметра columnTitle. Переводится
 	// функцией tr.
 	QstField(const FieldRole &role,
 			 const QString &name,
-			 const FieldVisibility &visibility = FieldVisible,
+			 const FieldVisibility &visibility = FieldInvisible,
 			 const char *columnTitle = "",
-			 const int &columnWidth = 0,
+			 const int &columnWidth = 150,
 			 const Qt::Orientation &titleOrientation = Qt::Horizontal);
 
 	// Конструктор для поля в секции SELECT
@@ -59,7 +58,7 @@ public:
 	QstField(const QString &name,
 			 const FieldVisibility &visibility = FieldVisible,
 			 const char *columnTitle = "",
-			 const int &columnWidth = 0,
+			 const int &columnWidth = 150,
 			 const Qt::Orientation &titleOrientation = Qt::Horizontal);
 
 	// Конструктор для одинарного фильтра;
@@ -67,14 +66,14 @@ public:
 	// для параметров процедуры.
 	QstField(const QString &name,
 			 const QstValue &value,
-			 const FieldPurposes purposes = PurposeAllValued_Mask
+			 const FieldPurposes purposes = PurposeValued_Mask
 			 );
 
 	// Конструктор для бинарного фильтра ("BETWEEN").
 	QstField(const QString &name,
-				const QstValue &value1,
-				const QstValue &value2,
-				const FieldPurposes purposes = PurposeWhere);// для удобства. Игнорируется.
+			 const QstValue &value1,
+			 const QstValue &value2,
+			 const FieldPurposes purposes = PurposeWhere);// для удобства. Игнорируется.
 
 
 	// Конструктор для параметра процедуры.
@@ -130,7 +129,7 @@ private:
 	FieldRole		_role;
 	FieldPurposes	_purposes;
 
-	QstValuesVector		_values;
+	QstValueVector		_values;
 
 public:
 
@@ -159,7 +158,8 @@ public:
 
 ////////////////////////////////////////////////////////////////////////////////
 
-typedef QVector<QstField> QstFieldsVector;
+typedef QVector<QstField>	QstFieldVector;
+typedef QStringList			QstFieldNameList;
 
 ////////////////////////////////////////////////////////////////////////////////
 

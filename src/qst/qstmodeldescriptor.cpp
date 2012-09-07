@@ -1,5 +1,5 @@
 /****************************************************************************
-** QST 0.4.1 pre-alpha
+** QST 0.4.2a beta
 ** Copyright (C) 2010 Granin A.S.
 ** Contact: Granin A.S. (graninas@gmail.com)
 **
@@ -27,9 +27,21 @@
 ****************************************************************************/
 
 #include "qstmodeldescriptor.h"
-
 namespace Qst
 {
+
+namespace QstSpecial
+{
+	/*!
+		\class QstModelDescriptor
+		\brief
+		Служебный класс для хранения модели данных, представлений (QTableView,
+		QTreeView, QListView, QComboBox). Класс используется в QstAbstractModelHandler.
+
+		\inmodule Qst
+		\inmodule QstSpecial
+	*/
+
 	QstModelDescriptor::QstModelDescriptor()
 	 :
 	 _model(NULL),
@@ -49,22 +61,28 @@ namespace Qst
 		Q_ASSERT(model != NULL);
 	}
 
+	/*! Возвращает указатель на модель данных. */
 	QAbstractItemModel *QstModelDescriptor::pModel()
 	{
 		return _model;
 	}
 
+	/*! Возвращает константный указатель на модель данных. */
 	QAbstractItemModel *QstModelDescriptor::pModel() const
 	{
 		return _model;
 	}
 
+	/*! Устанавливает модель данных.
+
+		model должна быть не NULL. */
 	void QstModelDescriptor::setModel(QAbstractItemModel* model)
 	{
 		Q_ASSERT(model != NULL);
 		_model = model;
 	}
 
+	/*! Добавляет представление в список представлений и возвращает его индекс. */
 	int QstModelDescriptor::addView(QAbstractItemView *view, const bool &modelize)
 	{
 		if (!_views.contains(view))
@@ -78,6 +96,7 @@ namespace Qst
 		return _views.indexOf(view);
 	}
 
+	/*! Добавляет QComboBox в список объектов QComboBox и возвращает его индекс. */
 	int QstModelDescriptor::addComboBox(QComboBox *comboBox, const bool &modelize)
 	{
 		if (!_comboBoxes.contains(comboBox))
@@ -91,46 +110,43 @@ namespace Qst
 		return _comboBoxes.indexOf(comboBox);
 	}
 
+	/*! Возвращает указатель на представление по индексу. */
 	QAbstractItemView * QstModelDescriptor::view(const int &index)
 	{
 		return _views.value(index, NULL);
 	}
 
+	/*! Возвращает константный указатель на представление по индексу. */
 	QAbstractItemView * QstModelDescriptor::view(const int &index) const
 	{
 		return _views.value(index, NULL);
 	}
 
+	/*! Возвращает указатель на выпадающий список по индексу. */
 	QComboBox * QstModelDescriptor::comboBox(const int &index)
 	{
 		return _comboBoxes.value(index, NULL);
 	}
 
+	/*! Возвращает константный указатель на выпадающий список по индексу. */
 	QComboBox * QstModelDescriptor::comboBox(const int &index) const
 	{
 		return _comboBoxes.value(index, NULL);
 	}
 
-	QListView  * QstModelDescriptor::listView(const int &index)
-	{
-		return _listViews.value(index, NULL);
-	}
-
-	QListView  * QstModelDescriptor::listView(const int &index) const
-	{
-		return _listViews.value(index, NULL);
-	}
-
+	/*! Возвращает тип модели. */
 	ModelType QstModelDescriptor::modelType() const
 	{
 		return _modelType;
 	}
 
+	/*! Устанавливает тип модели. */
 	void QstModelDescriptor::setModelType(const ModelType & modelType)
 	{
 		_modelType = modelType;
 	}
 
+	/*! Очищает списки представлений. */
 	void QstModelDescriptor::clearViews()
 	{
 		demodelizeViews();
@@ -142,6 +158,8 @@ namespace Qst
 		_comboBoxesCurrentIndexes.clear();
 	}
 
+	/*! Привязывает представления к модели.
+	  Восстанавливает текущую позицию в представлении. */
 	void QstModelDescriptor::modelizeViews()
 	{
 		Q_ASSERT(_model != NULL);
@@ -166,6 +184,8 @@ namespace Qst
 		}
 	}
 
+	/*! Отвязывает модель от представления.
+		Запоминает текущую позицию в представлении. */
 	void QstModelDescriptor::demodelizeViews()
 	{
 		_viewsCurrentIndexes.resize(_views.size());
@@ -179,29 +199,33 @@ namespace Qst
 		for (int i = 0; i < _comboBoxes.size(); ++i)
 		{
 			_comboBoxesCurrentIndexes[i] = _comboBoxes[i]->currentIndex();
-			_comboBoxes[i]->setModel(_model);
+			_comboBoxes[i]->setModel(NULL);
 		}
 
 		for (int i = 0; i < _listViews.size(); ++i)
 		{
-			_listViews[i]->setModel(_model);
+			_listViews[i]->setModel(NULL);
 		}
 	}
 
+	/*! Возвращает описатель запроса. */
 	QstQueryDescriptor QstModelDescriptor::queryDescriptor() const
 	{
 		return _queryDescriptor;
 	}
 
+	/*! Устанавливает описатель запроса. */
 	void QstModelDescriptor::setQueryDescriptor(const QstQueryDescriptor &descriptor)
 	{
 		_queryDescriptor = descriptor;
 	}
 
-
+	/*! Возвращает true, если модель не NULL. */
 	bool QstModelDescriptor::isValid() const
 	{
 		return _model != NULL;
 	}
 
-}
+}	// End of namespace QstSpecial
+
+}	// End of namespace Qst

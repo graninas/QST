@@ -1,5 +1,5 @@
 /****************************************************************************
-** QST 0.4.1 pre-alpha
+** QST 0.4.2a beta
 ** Copyright (C) 2010 Granin A.S.
 ** Contact: Granin A.S. (graninas@gmail.com)
 **
@@ -27,12 +27,20 @@
 ****************************************************************************/
 
 #include "qstquerygenerator.h"
-#include "qstquerycomposer.h"
 
 namespace Qst
 {
 
+	/*!
+	\class QstQueryComposer
+	\brief
+		Класс отвечает за генерацию всего SQL-запроса по переданным
+		в него QstBatch и типу запроса QueryType.
 
+	\inmodule Qst
+	*/
+
+/*! Конструктор по умолчанию. */
 QstQueryGenerator::QstQueryGenerator()
 	:
 	_batch(QstBatch()),
@@ -40,6 +48,7 @@ QstQueryGenerator::QstQueryGenerator()
 {
 }
 
+/*! Основной конструктор. */
 QstQueryGenerator::QstQueryGenerator(const QstBatch &batch, const QueryType &queryType)
 	:
 	_batch(batch),
@@ -47,29 +56,22 @@ QstQueryGenerator::QstQueryGenerator(const QstBatch &batch, const QueryType &que
 {
 }
 
-
-
-
+/*! Возвращает пакет QstBatch. */
 QstBatch QstQueryGenerator::batch() const
 {
 	return _batch;
 }
 
+/*! Возвращает тип запроса. */
 QueryType QstQueryGenerator::queryType() const
 {
 	return _queryType;
 }
 
-bool QstQueryGenerator::isValid() const
+/*! Создает компоновщик, настраивает его полями QstField и возвращает
+	копию компоновщика. */
+QstQueryComposer QstQueryGenerator::queryComposer() const
 {
-	return _batch.isValid();
-}
-
-QString QstQueryGenerator::query() const
-{
-	if (!isValid())
-		return QString();
-
 	QstQueryComposer composer;
 
 	QStringList sources = _batch.sources();
@@ -77,8 +79,8 @@ QString QstQueryGenerator::query() const
 	for (int i = 0; i < sources.size(); ++i)
 		composer.addSource(sources[i]);
 
-	QstFieldsVector selectClauseFields = _batch.fields(PurposeSelect);
-	QstFieldsVector stuffFields = _batch.fields(PurposeAllButSelect_Mask);
+	QstFieldVector selectClauseFields = _batch.fields(PurposeSelect);
+	QstFieldVector stuffFields = _batch.fields(PurposeAllButSelect_Mask);
 
 	for (int i = 0; i < selectClauseFields.size(); ++i)
 		composer.addSelectClauseField(selectClauseFields[i]);
@@ -86,8 +88,38 @@ QString QstQueryGenerator::query() const
 	for (int i = 0; i < stuffFields.size(); ++i)
 		composer.addStuffField(stuffFields[i]);
 
-return composer.query(_queryType);
+return composer;
 }
 
+/*! Возвращает true, если QstBatch::isValid() == true. */
+bool QstQueryGenerator::isValid() const
+{
+	return _batch.isValid();
+}
+
+/*! Компонует и возвращает запрос. */
+QString QstQueryGenerator::query() const
+{
+	if (!isValid())
+		return QString();
+
+return queryComposer().query(_queryType);
+}
+
+/*! Компонует и возвращает в массиве секции SQL-запроса,
+	заказанные в параметре clauses. */
+QueryClauseMap QstQueryGenerator::queryParts(const QueryClauses &clauses) const
+{
+	return queryComposer().queryParts(clauses);
+}
+
+/*! Компонует и возвращает секцию SQL-запроса,
+	заказанную в параметре clause. */
+QString QstQueryGenerator::queryPart(const QueryClause &clause) const
+{
+	QueryClauseMap map = queryComposer().queryParts(clause);
+
+	return map[clause];
+}
 
 }

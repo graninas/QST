@@ -1,5 +1,5 @@
 /****************************************************************************
-** QST 0.4.1 pre-alpha
+** QST 0.4.2a beta
 ** Copyright (C) 2010 Granin A.S.
 ** Contact: Granin A.S. (graninas@gmail.com)
 **
@@ -28,9 +28,19 @@
 
 #include "ut_qstdefaultitemnameextractor.h"
 
+using namespace Qst;
+
 typedef QstDefaultItemNameExtractor T;
 
 Q_DECLARE_METATYPE(QstDefaultItemNameExtractor)
+
+namespace QstTest
+{
+
+	/*!
+		\class ut_QstDefaultItemNameExtractor
+		\brief Модульный тест для класса QstDefaultItemNameExtractor.
+	*/
 
 ut_QstDefaultItemNameExtractor::ut_QstDefaultItemNameExtractor()
 {
@@ -68,3 +78,5 @@ void ut_QstDefaultItemNameExtractor::extractItemName_data()
 	QTest::newRow("16")	<< T("FieldName [alias]")	<< QString("alias");
 	QTest::newRow("17")	<< T("count(key)  [alias]")	<< QString("alias");
 }
+
+} // End of namespace QstTest

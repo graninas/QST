@@ -1,5 +1,5 @@
 /****************************************************************************
-** QST 0.4.1 pre-alpha
+** QST 0.4.2a beta
 ** Copyright (C) 2010 Granin A.S.
 ** Contact: Granin A.S. (graninas@gmail.com)
 **
@@ -37,7 +37,10 @@
 
 #include <QString>
 
-#include <QDebug>
+#include "qstglobal.h"
+
+namespace Qst
+{
 
 class QstDBConnection
 {
@@ -45,18 +48,19 @@ private:
 
 	QSqlDatabase _db;
 	QString _hostName;
+	int		_port;
 	QString _databaseName;
 	QString	_userName;
 	QString _password;
 
-	QSqlError _lastError;
-
 	QString _driverName;
-	bool _open(const QString &connectionName = QString());
 
 public:
 
+	QstDBConnection(const QString &driverName = QST_DEFAULT_DATABASE_DRIVER);
+
 	void setHostName(const QString& hostName);
+	void setPort(const int& port);
 	void setUserName(const QString& userName);
 	void setDatabaseName(const QString& databaseName);
 	void setPassword(const QString& password);
@@ -65,16 +69,35 @@ public:
 
 	bool isOpen() const;
 
-	bool connect(const QString& userName, const QString& password, const QString &connectionName = QString());
+	bool connect(const QString& userName,
+				 const QString& password,
+				 const QString &connectionName = QString());
 
-	bool connect(const QString& hostName, const QString& databaseName,
-		 const QString& userName, const QString& password, const QString &connectionName = QString());
+	bool connect(const QString& hostName,
+				 const QString& databaseName,
+				 const QString& userName,
+				 const QString& password,
+				 const QString &connectionName = QString());
 
-	bool test(const QString& hostName, const QString& databaseName,
-		 const QString& userName, const QString& password);
+	bool connect(const QString& hostName,
+				 const int &port,
+				 const QString& databaseName,
+				 const QString& userName,
+				 const QString& password,
+				 const QString &connectionName = QString());
+
+	bool test(const QString& hostName,
+			  const QString& databaseName,
+			  const QString& userName,
+			  const QString& password);
+
+	bool test(const QString& hostName,
+			  const int &port,
+			  const QString& databaseName,
+			  const QString& userName,
+			  const QString& password);
 
 	bool test();
-	QSqlError lastError() const;
 
 	bool open(const QString &connectionName = QString());
 	void close();
@@ -85,10 +108,21 @@ public:
 					   const QString& userName,
 					   const QString& password);
 
+	bool addConnection(const QString &connectionName,
+					   const QString& hostName,
+					   const int &port,
+					   const QString& databaseName,
+					   const QString& userName,
+					   const QString& password);
+
 	QSqlDatabase &rdb();
 	QSqlDatabase *pdb();
 
-	QstDBConnection();
+private:
+
+	bool _open(const QString &connectionName = QString());
 };
+
+} // End of namespace Qst
 
 #endif // QSTDBCONNECTION_H

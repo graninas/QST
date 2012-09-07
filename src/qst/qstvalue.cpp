@@ -1,5 +1,5 @@
 /****************************************************************************
-** QST 0.4.1 pre-alpha
+** QST 0.4.2a beta
 ** Copyright (C) 2010 Granin A.S.
 ** Contact: Granin A.S. (graninas@gmail.com)
 **
@@ -34,6 +34,24 @@
 namespace Qst
 {
 
+	/*!
+		\class QstValue
+		\brief
+		Хранит QVariant-значение, а так же функтор сравнения и
+		"нечеткие скобки" (для строковых типов данных).
+		Используется в DFD-описателях в качестве правой части условия:
+		<левая часть> <правая часть:[Функтор, значение]>.
+
+		\inmodule Qst
+	*/
+
+/*! Основной конструктор и конструктор по умолчанию.
+
+	Если установлен флаг QST_VALUE_SET_DEFAULT_FUNCTORS, функтор и
+	нечеткие скобки будут выставлены в зависимости от типа QVariant.
+	В этом случае второй и третий параметры игнорируются.
+
+	По умолчанию создает инвалидный QstValue. */
 QstValue::QstValue(const QVariant &value,
 				   const CompareFunctor &functor,
 				   const FuzzyBraces &braces)
@@ -87,6 +105,69 @@ QstValue::QstValue(const QVariant &value,
 #endif
 }
 
+/*!
+	Конструктор с расширенной функциональностью для создания фильтров
+	на формах, где требуется точное и неточное совпадение строк.
+	В отличие от основного конструктора создает QstValue только тогда, когда
+	enable = true. В качестве enabled может быть передан параметр isChecked
+	от QComboBox. */
+QstValue::QstValue(const bool &enabled,
+				   const QString &valueString,
+				   const bool &fullStringMatch,
+				   const CompareFunctor &functor,
+				   const FuzzyBraces &braces,
+				   const MatchPolicy &matchPolicy)
+	   :
+	   _value(valueString),
+	   _functor(functor),
+	   _braces(braces)
+{
+	if (!enabled)
+	{
+		_value = QVariant();
+		_functor = FunctorNone;
+		_braces = BracesNone;
+	}
+	else
+	{
+		_value = QVariant(valueString);
+
+		switch (matchPolicy)
+		{
+		case MatchFlagDependent:
+			if (fullStringMatch)
+			{
+				_functor = FunctorEqual;
+				_braces = BracesNone;
+			}
+			else
+			{
+				_functor = functor;
+				_braces	 = braces;
+			}
+			break;
+
+		case MatchBracesDependent:
+			_functor = FunctorLike;
+			_braces	 = braces;
+			break;
+
+		case MatchFuzzy:
+			_functor = FunctorLike;
+			_braces  = BracesBoth;
+			break;
+
+		case MatchFull:
+			_functor = FunctorEqual;
+			_braces = BracesNone;
+			break;
+
+		default: Q_ASSERT(false);
+		};
+	}
+}
+
+/*! Создает QstValue на основе другого, при этом изменяет functor и braces. */
 QstValue::QstValue(const QstValue &other,
 				   const CompareFunctor &functor,
 				   const FuzzyBraces &braces)
@@ -97,6 +178,7 @@ QstValue::QstValue(const QstValue &other,
 {
 }
 
+/*! Конструктор копирования. */
 QstValue::QstValue(const QstValue &other)
 	   :
 	   _value(other.value()),
@@ -105,6 +187,7 @@ QstValue::QstValue(const QstValue &other)
 {
 }
 
+/*! QVariant-like конструктор для конструирования NULL-значений. */
 QstValue::QstValue(const NullType &null)
 	:
 	_value(QVariant::Int),
@@ -115,34 +198,40 @@ QstValue::QstValue(const NullType &null)
 
 // ------------------------------------------------------------------------ //
 
-
+/*! Возвращает QVariant-значение. */
 QVariant QstValue::value() const
 {
 	return _value;
 }
 
+/*! Возвращает функтор сравнения. */
 CompareFunctor QstValue::functor() const
 {
 	return _functor;
 }
 
+/*! Возвращает нечеткие скобки. */
 FuzzyBraces QstValue::braces() const
 {
 	return _braces;
 }
 
+/*! Преобразует QVariant-зачение в строку.
+
+	Результат преобразования зависит от параметров функции. */
+
 QString QstValue::toString(const ValueBordering &bordering,
-						   const NullSubstitution &fillSqlNull,
-						   const FuzzyBracesUsage &useBraces) const
+						   const FuzzyBracesUsage &useBraces,
+						   const NullSubstitution &nullSubstitute) const
 {
 	if (!_value.isValid())
 	{
-		return _toInvalidString(bordering, fillSqlNull, useBraces);
+		return _toInvalidString(bordering, nullSubstitute, useBraces);
 	}
 
 	if (_value.isNull())
 	{
-		return _toEmptyString(bordering, fillSqlNull, useBraces);
+		return _toEmptyString(bordering, nullSubstitute, useBraces);
 	}
 
 	if (_value.type() == QVariant::Date)
@@ -153,31 +242,31 @@ QString QstValue::toString(const ValueBordering &bordering,
 return _toString(_value.toString(), bordering, useBraces);
 }
 
-QVariant &QstValue::rValue()
-{
-	return _value;
-}
-
+/*! Устанавливает QVariant-значение. */
 void QstValue::setValue(const QVariant &value)
 {
 	_value = value;
 }
 
+/*! Устанавливает фукнтор сравнения. */
 void QstValue::setFunctor(const CompareFunctor &functor)
 {
 	_functor = functor;
 }
 
+/*! Устанавливает нечеткие скобки. */
 void QstValue::setBraces(const FuzzyBraces &braces)
 {
 	_braces = braces;
 }
 
+/*! Возвращает true, если QVariant-значение нулевое. */
 bool QstValue::isNull() const
 {
 	return _value.isNull();
 }
 
+/*! Возвращает true QVariant-значение валидно. */
 bool QstValue::isValid() const
 {
 

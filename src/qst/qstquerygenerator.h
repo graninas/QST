@@ -1,5 +1,5 @@
 /****************************************************************************
-** QST 0.4.1 pre-alpha
+** QST 0.4.2a beta
 ** Copyright (C) 2010 Granin A.S.
 ** Contact: Granin A.S. (graninas@gmail.com)
 **
@@ -30,7 +30,7 @@
 #define QSTQUERYGENERATOR_H
 
 #include "qstbatch.h"
-#include "qstglobal.h"
+#include "qstquerycomposer.h"
 
 namespace Qst
 {
@@ -42,9 +42,13 @@ public:
 	QstQueryGenerator(const QstBatch &batch, const QueryType &queryType = QuerySelect);
 
 	QString query() const;
+	QueryClauseMap queryParts(const QueryClauses &clauses) const;
+	QString queryPart(const QueryClause &clause) const;
 
 	QstBatch batch() const;
 	QueryType queryType() const;
+
+	QstQueryComposer queryComposer() const;
 
 	bool isValid() const;
 

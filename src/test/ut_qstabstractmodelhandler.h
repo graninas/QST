@@ -26,47 +26,43 @@
 **
 ****************************************************************************/
 
-#ifndef UT_QSTQUERYGENERATOR_H
-#define UT_QSTQUERYGENERATOR_H
+#ifndef UT_QSTABSTRACTMODELHANDLER_H
+#define UT_QSTABSTRACTMODELHANDLER_H
 
 #include <QObject>
 #include <QTest>
 
-#include "qst/qstquerygenerator.h"
+#include "test/testhandler.h"
 
 namespace QstTest
 {
 
-class ut_QstQueryGenerator : public QObject
+
+class ut_QstAbstractModelHandler : public QObject
 {
+
 	Q_OBJECT
+
 public:
-	ut_QstQueryGenerator();
+	ut_QstAbstractModelHandler();
 
 private slots:
 
 	void initTestCase();
+	void cleanupTestCase();
 
-	void query();
-	void query_data();
+	void value();
+	void value_data();
 
-	void batch();
-	void batch_data();
-
-	void queryType();
-	void queryType_data();
-
-	void isValid();
-	void isValid_data();
+	void generateQuery1();
+	void generateQuery1_data();
 
 private:
 
-	Qst::QstBatch m_b1, m_b2, m_b3, m_b4, m_b5, m_b6;
+	QstTest::TestHandler		m_h1, m_h2, m_h3, m_h4;
 
-	Qst::QstBatch m_b7, m_b8, m_b9;
 };
 
 } // End of namespace QstTest
 
-
-#endif // UT_QSTQUERYGENERATOR_H
+#endif // UT_QSTABSTRACTMODELHANDLER_H

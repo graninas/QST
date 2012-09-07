@@ -1,5 +1,5 @@
 /****************************************************************************
-** QST 0.4.1 pre-alpha
+** QST 0.4.2a beta
 ** Copyright (C) 2010 Granin A.S.
 ** Contact: Granin A.S. (graninas@gmail.com)
 **
@@ -34,248 +34,195 @@
 namespace Qst
 {
 
-	QstAbstractModelHandler::QstAbstractModelHandler()
-		:
-		_rowCount(0)
-	{
-	}
-
-	QstAbstractModelHandler::~QstAbstractModelHandler()
-	{
-	}
+using namespace QstSpecial;
 
 	/*!
 		\class QstAbstractModelHandler
 		\brief
-		Класс используется для упрощения работы с моделями,
-		запросами и представлениями.
+		Класс является основным инструментом для генерации запросов, работы
+		с моделями, представлениями и ключевыми полями.
 
-		\inmodule Sql
+		\inmodule Qst
 
 		QstAbstractModelHandler - это абстрактный класс, в котором
-		заключены функции по работе с источниками данных, функции по
-		выбору определенного значения из модели данных, функции
-		настройки модели и представления, функции, отвечающие за
-		генерацию запросов SQL.
+		заключены функции по выбору определенного значения
+		из представления / модели данных, функции настройки модели и представления,
+		функции, отвечающие за генерацию и вызов SQL-запросов.
 
 		Класс является абстрактным. Для работы с определенным объектом
 		БД создается наследник, у которого переопределяются виртуальные
 		функции _selector(), _inserter(), _deleter(), _updater()
 		и _executor(), отвечающие за генерацию конкретного DFD-описателя.
-		(DFD = Declarative Field Descriptor), который впоследствии
-		служит для генерации SQL-запросов. Пример:
+		(DFD = Declarative Field Descriptor). Фактически, класс-наследник
+		задает интерфейс для работы с конкретным объектом БД:
+		с таблицей, представлением, хранимой процедурой или пользовательской функцией.
 
-		\code
-		class NomenclatureHandler : public QstAbstractModelHandler
-		{
-		public:
-			NomenclatureHandler();
+		Пример.
+		Класса-хэндлер для работы с номенклатурой. Переопределены функции _selector()
+		(для генерирования SELECT-запросов) и _executor() (для вызова хранимой процедуры).
+		Так же создана функция createNomenclature(), при вызове которой происходит
+		(каким-либо образом) создание в базе данных одной номенклатурной записи.
 
-		private:
+\code
+const int NOMENCLATURE = 1;
+const int NOMENCLATURE_COUNT = 2;
 
-		  virtual QstQueryDescriptor _selector(
-				const ModelTypes &modelType = mt_plain,
-				const int &queryNumber = 0) const;
-		  virtual QstQueryDescriptor _inserter(const int &queryNumber = 0) const;
-		  virtual QstQueryDescriptor _updater(const int &queryNumber = 0) const;
-		  virtual QstQueryDescriptor _deleter(const int &queryNumber = 0) const;
-		  virtual QstQueryDescriptor _executor(const int &queryNumber = 0) const;
-		};
-		\endcode
+class NomenclatureHandler : public QstAbstractModelHandler
+{
+public:
+	NomenclatureHandler();
 
-		Эти функции неявно вызываются всякий раз, когда необходимо
-		создать запрос для модели, вставить данные в БД или выбрать
-		значение определенного поля. Например, функция Delete()
-		базового класса вызывает функцию _deleter() дочернего класса,
-		которая возвращает DFD-описатель для запроса DELETE. Затем
-		описатель передается генератору, и базовый класс получает
-		запрос на языке SQL, который затем выполняет.
+	void createNomenclature(const QVariant &nomenclatureName, const QVariant &nomenclatureGroupID);
 
-		Группа этих функций отвечает за создание описателей. Всего
-		в классе три группы функций:
-		- создание и удаление источников данных;
-		- извлечение значений полей из источников данных;
-		- создание описателей.
+private:
 
-		Центральным является понятие об источнике данных. Источник
-		данных - это связка "DFD-описатель - SQL-запрос - Модель -
-		Представление". Представления в связке может не быть; тогда
-		некоторые функции класса будут возвращать невалидные данные.
+	Qst::QstBatch _selector(const int &queryNumber) const;
+	Qst::QstBatch _executor(const int &queryNumber) const;
+};
+\endcode
 
-		Допустим, нам нужно создать TableView, в котором бы отображались
-		данные запроса "SELECT Name, Age, Birthday FROM tPersons". На
-		языке DFDL этот запрос выглядит следующим образом:
+		Функции _selector(), _inserter(), _deleter(), _updater()
+		и _executor() вызываются всякий раз, когда необходимо
+		выполнить запрос, обновить модель данных, выбрать
+		значение определенного поля и т.п. Например, при вызове функции Delete(),
+		описанной в QstAbstractModelHandler, с помощью функции _deleter()
+		создается DFD-описатель, затем по описателю компонуется SQL-запрос
+		типа DELETE и выполняется. Разумеется, функция _deleter() должна быть
+		переопределена в дочернем классе, иначе возникнет ошибка.
 
-		\code
-		QstBatch batch;
+		В переопределенных генерирующих функциях заполняется структура QstBatch,
+		представляющая собой контейнер DFD-описателей. Можно заполнять QstBatch
+		по-разному, создавая таким образом разные SQL-запросы к одному и тому же
+		объекту БД.
 
-		batch.addSource("tPersons");
+		Пример. С помощью нижеописанного _selector() можно создать два запроса
+		(запросы в после генерации могут иметь несколько иной вид в зависимости
+		от разных факторов):
 
-		batch	<< QstField("Name", fv_visible, fr_none, "Имя", 100)
-				<< QstField("Age", fv_visible, fr_none, "Возраст", 80)
-				<< QstField("Birthday", fv_visible, fr_none, "Дата рождения", 80)
-				<< QstField("ID", fv_invisible, fr_id);
+		I.
+\code
+SELECT ID, Name, NomenclatureGroupName, NomenclatureGroupID
+FROM vNomenclature
+WHERE Name LIKE '%чай%'
+\endcode
 
-		QstQueryDescriptor descriptor(batch, sql_select, queryNumber);
-		\endcode
+		II.
+\code
+SELECT count(ID)
+FROM vNomenclature
+\endcode
 
-		Конечная структура descriptor содержит всю необходимую
-		информацию для создания SELECT-запроса. Более того, в ней
-		так же указано, будет ли поле отображаться в представлении
-		(значение fv_visible), какое будет название у колонки, а также
-		какую выставлять ширину колонке (последние два значения).
+\code
+QstBatch NomenclatureHandler::_selector(const int &queryNumber) const
+{
+	QstBatch batch;
 
-		При добавлении источника данных QstAbstractModelHandler возьмет эту
-		информацию и настроит модель/представление соответствующим
-		образом. Создать источник данных можно функцией reloadSource().
-		если его нет, и перезагрузить, если он есть.
-
-		Источники данных различаются по именам. Класс поддерживает схему,
-		когда одному источнику данных может
-		быть сопоставлено несколько представлений, но всегда каждый
-		источник данных связан только с определенной моделью с помощью имени.
-		Не запрещается передавать разным источникам одни и те же
-		модели, но в этом случае не гарантируется, что представления
-		будут отображать верные данные.
-
-		При создании источника QstAbstractModelHandler запрашивает виртуальную
-		функцию _selector(), чтобы получить QstQueryDescriptor. Затем
-		источник будет добавлен в список источников, генератор сгенерирует
-		SQL-запрос SELECT-типа, и запрос будет загружен в модель, а та - активирована.
-
-		Класс QstAbstractModelHandler позволяет загружать в разные источники
-		данных разные SELECT-запросы. Делается это с помощью параметра
-		queryNumber функции reloadSource(). В переопределенной
-		функции наследника _selector() программист должен выдавать нужный
-		описатель в зависимости от параметра queryNumber:
-
-		\code
-		// somewhere in nomenclaturehandler.cpp:
-	QstQueryDescriptor NomenclatureHandler::_selector(
-			const ModelTypes &modelType,
-			const int &queryNumber) const
+	if (queryNumber == NOMENCLATURE)	// Запрос I.
 	{
-		QstBatch batch;
+		batch	<< "vNomenclature"
 
-		if (queryNumber == QUERY1)
-		{
-			batch.addSource("Nomenclature");
+				// Поля для секции SELECT.
+				<< QstField(RolePrimaryKey, "ID", FieldInvisible)	// Ключевое поле.
+				<< QstField("Name", FieldVisible, "Наименование", 150)
+				<< QstField("NomenclatureGroupName", FieldVisible, "Группа", 100)
+				<< QstField("NomenclatureGroupID", FieldInvisible)
 
-			batch	<< QstField("Name", fv_visible, fr_none, "Наименование", 70)
-			  << QstField("ID", fv_invisible, fr_id);
-		}
-		else
-		if (queryNumber == QUERY2)
-		{
-			batch	<< QstField("Name", fv_visible, fr_none, "Наименование", 70)
-			  << QstField("ID", fv_invisible, fr_id)
-
-			  << QstField("GroupAttr", QstValue(0), fp_where);
-		}
-		else
-		{
-			Q_ASSERT(false);
-		}
-
-	return QstQueryDescriptor(batch, sql_select);
+				// Фильтры для секции WHERE. Могут отсутствовать, если
+				// value() возвратит инвалидный QstValue().
+				<< QstField("Name", value("Name"))
+				<< QstField("NomenclatureGroupID", value("NomenclatureGroupID"))
+				;
 	}
-		\endcode
+	else
+		if (queryNumber == NOMENCLATURE_COUNT) // Запрос II.
+		{
+			batch	<< "vNomenclature"
+					<< QstField(RolePrimaryKey, "count(ID)", FieldInvisible)
+					;
+		}
+	else
+	{
+		Q_ASSERT(false);	// Ошибка, если передан неверный queryNumber.
+	}
 
-		? екомендуется использовать предопределенные константы для каждого
-		запроса, а если пришло неверное значение queryNumber, - то
-		выдавать сообщение об ошибке с помощью Q_ASSERT(false),
-		как это сделано в примере.
+	return batch;
+}
+\endcode
 
-		Класс использует две модели данных: QstPlainQueryModel, которая
-		наследуется от QQstPlainQueryModel и практически ничем от родителя
-		не отличается, и QstTreeQueryModel - read-only модель для отображения
-		дерева. (? абота древовидной модели пока оставляет желать лучшего.)
-		Дополнительно к queryNumber в функции _select() есть
-		параметр modelType. Если используется QstPlainQueryModel, он равен
-		mt_plain; в противном случае - mt_tree.
+		После того, как класс-хэндлер заполнен, его можно использовать.
+		Пусть требуется выбрать данные в таблицу QTableView с помощью этого хэндлера.
+		Создаются объект класса-хэндлера и модель данных:
+\code
+NomenclatureHandler			nomenclatureHandler;
+Qst::QstPlainQueryModel		nomenclatureModel;
+\endcode
 
-		Прикрепить представление к источнику данных можно функциями
-		setTreeView(), setTableView() и setComboBox(). Функции возвращают
-		индекс представления в списке для доступа к нему через другие
-		функции класса.
+		Далее в классе-хэндлере задается нужный описатель, привязываются модель
+		и объект QTableView:
+\code
+nomenclatureHandler.reload(NOMENCLATURE,
+						   &nomenclatureModel);
+nomenclatureHandler.setTableView(ui->NomenclatureTable);
+\endcode
 
-		\attention TreeView и TableView добавляются в один список, а
-		ComboBox - в другой. TreeView и TableView являются моделями
-		QAbstractItemView, в то время как ComboBox не является, поэтому
-		нельзя совместить их в одном списке. Во избежание ошибок функции
-		по работе с этими представлениями разделены.
+		Естественно, данные будут отображаться только в течение жизни объектов
+		nomenclatureHandler и nomenclatureModel.
 
-		Настоящая мощь класса проявляется при работе с данными. Следующий
-		пример показывает, как можно получить значение конкретного поля
-		из хэндлера.
+		\sa reload()
 
-		\code
-		\\ somewhere in mainqindow.h:
-		#include "phonecodeshandler.h"
+		С помощью настроенного класса-хэндлера можно выбрать ключевое значение
+		строки, которая выделена в представлении:
+\code
+QVariant selectedNomenclatureRowID = nomenclatureHandler.keyValueOfView();
+\endcode
 
-		\\ ...
+		Либо выбрать ключевые поля для нескольких выделенных строк:
+\code
+QVariantList selectedNomenclatureRowIDs = nomenclatureHandler.selectedKeysOfView();
+\endcode
 
-		QstPlainQueryModel	_queryModel;
-		PhoneCodesHandler   _phonesHandler;
+		\sa keyValueOfView(), selectedKeysOfView()
 
-		\\ somewhere in mainqindow.cpp:
+		Точно так же можно привязать к модели данных другие представления, например,
+		выпадающий список:
+\code
+nomenclatureHandler.reload(NOMENCLATURE,
+						   &nomenclatureModel);
+nomenclatureHandler.setTableView(ui->NomenclatureTable);
 
-		_phonesHandler.reloadSource(PHONE_CODES_SOURCE, PHONE_CODES, &_queryModel);
+nomenclatureHandler.setTableView(ui->NomenclatureTable2);
+nomenclatureHandler.setComboBox(ui->NomenclatureComboBox);
+\endcode
 
-		_phonesHandler.setTreeView(PHONE_CODES_SOURCE, ui->treeView);
-		_phonesHandler.setComboBox(PHONE_CODES_SOURCE, ui->comboBox);
+		Если установлено несколько представлений, то нужно указывать, из какого
+		представления выбирать ключевые поля. Для этого в функциях keyValueOfView(),
+		selectedKeysOfView(), keyValueOfComboBox() предусмотрен параметр-индекс
+		нужного представления (возвращается функциями setTableView(), setComboBox() и др.)
 
-		QVariant id = _phonesHandler.keyValueOfComboBox(PHONE_CODES_SOURCE);
-		_phonesHandler.setValue("ID", id);	// Same for "setValue(ID_VALUE, id)"
-		QVariant code = _phonesHandler.SelectToValue("Code", PHONE_CODES);
-		\endcode
+		\attention
+		Объекты классов QTreeView, QListView и QTableView добавляются
+		в один список, а объекты класса QComboBox - в другой, поэтому индексы
+		для первых трех классов идут вместе, а индексы для класса
+		QComboBox считаются отдельно.
 
-		При каждом вызове SelectToValue() генерируется и
-		исполняется SQL-запрос SELECT-типа. Извлекаемым значением может быть
-		поле как с флагом fv_visible, так и с флагом fv_invisible. Функция
-		setValue() позволяет загружать в класс любые данные. Конечно,
-		за удобство программист расплачивается скоростью работы программы,
-		так как все значения хранятся в QMap, и доступ к ним осуществляется
-		по имени.
-
-		Чтобы получить ранее записанное значение, существует функция value().
-		Ее хорошей особенностью является то, что в нее можно передать,
-		что возвращать, когда значения с таким именем в списке не нашлось.
-		По умолчанию вместо ненайденного значения возвращается QstValue().
-		Это важно помнить при создании DFD-описателя.
-
-		\sa QstField, QstValue, sqlglobal.h
+		\sa SelectToValue(), SelectToMap(), value(), setValue(), QstField, QstValue
 		*/
+
+	/*! Конструктор по умолчанию. */
+	QstAbstractModelHandler::QstAbstractModelHandler()
+		:
+		_loaded(false)
+	{
+	}
+
+	/*! Чисто виртуальный деструктор. */
+	QstAbstractModelHandler::~QstAbstractModelHandler()
+	{
+	}
 
 	////////////////////////////////////////////////////////////////////////////////
 
-	/*! Перезагружает источник данных для плоской модели.
-
-	Если такового нет, создает новый.
-
-	При вызове метода _selector() передает queryNumber == 0 и modelType == mt_plain. */
-	void QstAbstractModelHandler::reload(QstPlainQueryModel * model,
-										 const QSqlDatabase &db)
-	{
-		_reload(model, ModelPlain, 0, false, db);
-	}
-
-	/*! Перезагружает источник данных для иерархической модели.
-
-	Если такового нет, создает новый.
-
-	При вызове метода _selector() передает queryNumber == 0 и modelType == mt_tree. */
-	void QstAbstractModelHandler::reload(QstTreeQueryModel * model,
-										 const QSqlDatabase &db)
-	{
-		_reload(model, ModelTree, 0, false, db);
-	}
-
-	/*! Перезагружает источник данных для плоской модели. Сохраняет номер запроса.
-
-	Если источника нет, создает новый.
-
-	В метод _selector() передаются queryNumber и modelType == mt_plain. */
+	/*! Перезагружает плоскую модель данных. */
 	void QstAbstractModelHandler::reload(const int &queryNumber,
 										 QstPlainQueryModel * model,
 										 const QSqlDatabase &db)
@@ -283,11 +230,7 @@ namespace Qst
 		_reload(model, ModelPlain, queryNumber, true, db);
 	}
 
-	/*! Перезагружает источник данных для иерархической модели. Сохраняет номер запроса.
-
-	Если источника нет, создает новый.
-
-	В метод _selector() передаются queryNumber и modelType == mt_tree. */
+	/*! Перезагружает древовидную модель данных.*/
 	void QstAbstractModelHandler::reload(const int &queryNumber,
 										 QstTreeQueryModel * model,
 										 const QSqlDatabase &db)
@@ -296,74 +239,80 @@ namespace Qst
 	}
 
 
+	/*! Перезагружает загруженную ранее модель данных.
+
+		Если модель не была загружена ранее, выдает ошибку. */
+void QstAbstractModelHandler::reload(const QSqlDatabase &db)
+{
+	Q_ASSERT(_loaded);
+
+	_reload(pModel(),
+			_modelDescriptor.modelType(),
+			_modelDescriptor.queryDescriptor().queryNumber(),
+			false,
+			db);
+}
+
+/*! Возвращает true, если модель данных была загружена ранее, и false в противном случае. */
+bool QstAbstractModelHandler::isLoaded() const
+{
+	return _loaded;
+}
+
 	////////////////////////////////////////////////////////////////////////////////
 
-	/*! Связывает модель, находящуюся в источнике данных с именем sourceName, и
-	представление tableView.
+	/*! Связывает модель данных и объект класса QTableView (представление).
+	К одной и той же модели можно привязать несколько представлений.
 
-	У одной модели может быть несколько представлений.
-
-	Возвращается индекс, выданный этому tableView в списке представлений, связанных
-	с моделью.
-
-	\attention Представления tableView и treeView добавляются в один и тот же список,
-	таким образом, их индексы зависимы. */
+	Возвращает индекс представления в списке представлений. Так же в этот
+	список попадают классы QTreeView и QListView. */
 	int QstAbstractModelHandler::setTableView(QTableView * tableView)
 	{
 		Q_ASSERT(tableView != NULL);
 
-		int index;
-		index = _modelDescriptor.addView(tableView, true);
+		int index = _modelDescriptor.addView(tableView, true);
 
 		_setViewSettings<QTableView>(tableView, _modelDescriptor.queryDescriptor());
 
 		return index;
 	}
 
-	/*! Связывает модель, находящуюся в источнике данных с именем sourceName, и
-	представление treeView.
+	/*! Связывает модель данных и объект класса QTreeView (представление).
+	К одной и той же модели можно привязать несколько представлений.
 
-	У одной модели может быть несколько представлений.
-
-	Возвращается индекс, выданный этому treeView в списке представлений,
-	связанных с моделью.
-
-	\attention Представления tableView и treeView добавляются в один и тот же список,
-	таким образом, их индексы зависимы. */
+	Возвращает индекс представления в списке представлений. Так же в этот
+	список попадают классы QTableView и QListView. */
 	int QstAbstractModelHandler::setTreeView(QTreeView * treeView)
 	{
 		Q_ASSERT(treeView != NULL);
 
-		int index;
-		index = _modelDescriptor.addView(treeView, true);
+		int index = _modelDescriptor.addView(treeView, true);
 
 		_setViewSettings<QTreeView>(treeView, _modelDescriptor.queryDescriptor());
 
 		return index;
 	}
 
+	/*! Связывает модель данных и объект класса QListView (представление).
+	К одной и той же модели можно привязать несколько представлений.
+
+	Возвращает индекс представления в списке представлений. Так же в этот
+	список попадают классы QTableView и QTreeView. */
 	int QstAbstractModelHandler::setListView(QListView * listView)
 	{
 		Q_ASSERT(listView != NULL);
 
-		int index;
-
-		index = _modelDescriptor.addView(listView, true);
+		int index = _modelDescriptor.addView(listView, true);
 
 		_setListViewSettings(listView, _modelDescriptor.queryDescriptor());
 
 		return index;
 	}
 
-	/*! Связывает модель, находящуюся в источнике данных с именем sourceName, и
-	выпадающий список comboBox.
+	/*! Связывает модель данных и объект класса QComboBox (выпадающий список).
+	К одной и той же модели можно привязать несколько выпадающих списков.
 
-	У одной модели может быть несколько выпадающих списков.
-
-	Возвращается индекс, выданный этому comboBox.
-
-	В качестве отображаемого поля выбирается первое fv_visible поле из дескриптора
-	(описателя). */
+	Возвращает индекс привязанного QComboBox.*/
 	int QstAbstractModelHandler::setComboBox(QComboBox * comboBox)
 	{
 		Q_ASSERT(comboBox != NULL);
@@ -372,16 +321,6 @@ namespace Qst
 		index = _modelDescriptor.addComboBox(comboBox, true);
 
 		return index;
-	}
-
-	/*! Экспериментальная функция для получения количества строк.
-
-	Наиболее актуальна для драйверов ODBC.
-
-	? аботоспособность не подтверждена. */
-	int QstAbstractModelHandler::rowCount()
-	{
-		return _modelDescriptor.pModel()->rowCount();
 	}
 
 	/*! Удаляет источник данных. Модель удаляется, если явно передать deleteModel == true.
@@ -394,12 +333,11 @@ namespace Qst
 			delete _modelDescriptor.pModel();
 		}
 		_modelDescriptor = QstModelDescriptor();
+		_loaded = false;
 	}
 
 
 	/*! Возвращает индекс сервисного поля.
-
-		Данные берутся из модели, которая связана с источником данных sourceName.
 
 		В случае ошибки возвращает -1. */
 	int QstAbstractModelHandler::serviceFieldIndex(const FieldRole &role) const
@@ -412,9 +350,7 @@ namespace Qst
 	/*! Возвращает значение ключевого поля той строчки, на которую
 	указывает index.
 
-		Данные берутся из модели, которая связана с источником данных sourceName.
-
-		Если ключевое поле не найдено, возвращает QVariant(). */
+	Если ключевое поле не найдено, возвращает QVariant(). */
 	QVariant  QstAbstractModelHandler::keyValueOfRow(const QModelIndex &index) const
 	{
 		if (!index.isValid())
@@ -431,11 +367,9 @@ namespace Qst
 		return resIndex.data();
 	}
 
-	/*! Возвращает значение ключевого поля в строке row.
+	/*! Возвращает значение ключевого поля строки row.
 
-		Данные берутся из модели, которая связана с источником данных sourceName.
-
-		Если ключевое поле не найдено, возвращает QVariant(). */
+	Если ключевое поле не найдено, возвращает QVariant(). */
 	QVariant QstAbstractModelHandler::keyValueOfRow(const int &row) const
 	{
 		const QAbstractItemModel *model = _modelDescriptor.pModel();
@@ -450,10 +384,7 @@ namespace Qst
 	}
 
 
-	/*! Возвращает значение ключевого поля той строчки, которая
-	  является текущей в переданном view.
-
-	  Данные берутся из модели, которая связана с источником данных sourceName.
+	/*! Возвращает значение ключевого выделенной строки во view.
 
 	  Если ключевое поле не найдено, или текущий view.currentIndex() невалиден,
 	  возвращает QVariant(). */
@@ -464,12 +395,9 @@ namespace Qst
 		return keyValueOfRow(view->currentIndex());
 	}
 
-	/*! Возвращает значение ключевого поля той строчки, которая
-	  является текущей в переданном comboBox.
+	/*! Возвращает значение ключевого поля выделенной строки в comboBox.
 
-	  Данные берутся из модели, которая связана с источником данных sourceName.
-
-	  Если ключевое поле не найдено, или текущий comboBox.currentIndex() невалиден,
+	  Если ключевое поле не найдено, или comboBox.currentIndex() невалиден,
 	  возвращает QVariant(). */
 	QVariant QstAbstractModelHandler::keyValueOfCurrent(QComboBox * comboBox) const
 	{
@@ -478,17 +406,14 @@ namespace Qst
 		return keyValueOfRow(comboBox->currentIndex());
 	}
 
-	/*! Возвращает значение ключевого поля той строчки, которая
-	  является текущей во view.
+	/*! Возвращает значение ключевого поля строки, выделенной во view.
 
-	  View берется из источника данных sourceName. Если это единственный view,
-	  то параметр viewIndex можно не указывать. Если же в источнике данных
-	  находятся несколько view, то необходимо указать нужный индекс.
+	Если это единственный view, привязанный к модели данных, то параметр viewIndex
+	можно не указывать. Если же в источнике данных находятся несколько view,
+	то необходимо указать нужный индекс.
 
-	  Данные берутся из модели, которая связана с источником данных sourceName.
-
-	  Если ключевое поле не найдено, или текущий индекс во view невалиден,
-	  возвращает QVariant(). */
+	Если ключевое поле не найдено, или текущий индекс во view невалиден,
+	возвращает QVariant(). */
 	QVariant QstAbstractModelHandler::keyValueOfView(const int &viewIndex) const
 	{
 		QAbstractItemView * view;
@@ -499,17 +424,14 @@ namespace Qst
 		return keyValueOfCurrent(view);
 	}
 
-	/*! Возвращает значение ключевого поля той строчки, которая
-	  является текущей в comboBox.
+	/*! Возвращает значение ключевого поля строки, выделенной в comboBox.
 
-	  ComboBox берется из источника данных sourceName. Если это единственный comboBox,
-	  то параметр comboBoxIndex можно не указывать. Если же в источнике данных
-	  находятся несколько comboBox, то необходимо указать нужный индекс.
+	Если это единственный comboBox, привязанный к модели данных, параметр
+	comboBoxIndex можно не указывать. Если же в источнике данных находятся
+	несколько comboBox, необходимо указать нужный индекс.
 
-	  Данные берутся из модели, которая связана с источником данных sourceName.
-
-	  Если ключевое поле не найдено, или текущий индекс в comboBox невалиден,
-	  возвращает QVariant(). */
+	Если ключевое поле не найдено, или текущий индекс в comboBox невалиден,
+	возвращает QVariant(). */
 	QVariant QstAbstractModelHandler::keyValueOfComboBox(const int &comboBoxIndex) const
 	{
 		QComboBox * comboBox;
@@ -520,6 +442,10 @@ namespace Qst
 		return keyValueOfCurrent(comboBox);
 	}
 
+	/*! Возвращает список ключевых значений для строк, выделенных во view.
+
+	Может вернуть значения полей с FieldRole == RolePrimaryKey
+	или с FieldRole == RoleParentKey. */
 	QVariantList  QstAbstractModelHandler::selectedKeysOfView(const FieldRole &role,
 															  const int &viewIndex) const
 	{
@@ -545,127 +471,131 @@ namespace Qst
 		return keysList;
 	}
 
-	/*! Сохраняет value под именем valueName. */
+	/*! Сохраняет value под именем valueName в массиве значений.
+
+	\sa value(), valuesMap(), setValuesMap()*/
 	void QstAbstractModelHandler::setValue(const QString &valueName,
 										   const QstValue &value)
 	{
 		Q_ASSERT(!valueName.isEmpty());
 
-		_values[valueName] = value;
+		_valuesMap[valueName] = value;
 	}
 
-	/*! Возвращает значение по имени valueName.
+	/*! Возвращает значение по имени valueName из массива значений.
 
 		Если значение отсутствует, возвращает defaultValue.
-
-		По умолчанию defaultValue == QstValue().
-
-		При неопределенном INVALID_SQLVALUE_BY_DEFAULT, defaultValue меняется
-		на QstValue(nt_null). */
+	\sa setValue(), valuesMap(), setValuesMap()*/
 	QstValue QstAbstractModelHandler::value(const QString &valueName,
 											const QstValue &defaultValue) const
 	{
-		//	Прошлая конструкция:
-		//	return _values.value(valueName, defaultValue);
-		//	Недостаток: если значение есть, но инвалидное, а defaultValue - не
-		//	инвалидное, то вернется инвалидное вместо defaultValue.
-
-		QstValue val = _values.value(valueName, QstValue());
+		QstValue val = _valuesMap.value(valueName, QstValue());
 		if (!val.isValid())
 			return defaultValue;
 		return val;
 	}
 
-	/*! Возвращает значение по имени valueName.
+	/*! Возвращает значение по имени valueName из массива значений.
 
 		Если значение отсутствует, возвращает QstValue(nt_null).
 
-		Требует вторым параметром nt_null, что позволяет записать
-		[code]
-		value("val", QstValue(nt_null))
-		[/code]
-		короче:
-		[code]
+		Функция позволяет сократить запись:
+		\code
 		value("val", nt_null)
-		[/code]
+		\endcode
+		против
+		\code
+		value("val", QstValue(nt_null))
+		\endcode
+
+		\sa setValue(), valuesMap(), setValuesMap()
 	*/
 	QstValue QstAbstractModelHandler::value(const QString &valueName,
 											const NullType &nullType) const
 	{
-		//	Прошлая конструкция:
-		//	return _values.value(valueName, defaultValue);
-		//	Недостаток: если значение есть, но инвалидное, а defaultValue - не
-		//	инвалидное, то вернется инвалидное вместо defaultValue.
-
-		QstValue val = _values.value(valueName, QstValue());
+		QstValue val = _valuesMap.value(valueName, QstValue());
 		if (!val.isValid())
 			return QstValue(nullType);
 		return val;
 	}
 
+	/*! Устанавливает массив значений. Прошлые значения затираются.
+	  \sa valuesMap(), value(), setValue()
+	  */
+	void QstAbstractModelHandler::setValuesMap(const QstValueMap &valuesMap)
+	{
+		_valuesMap = valuesMap;
+	}
 
-	/*! Очищает список значений. */
+	/*! Возвращает массив значений. */
+	QstValueMap QstAbstractModelHandler::valuesMap() const
+	{
+		return _valuesMap;
+	}
+
+	/*! Очищает массив значений. */
 	void QstAbstractModelHandler::clearValues()
 	{
-		_values.clear();
+		_valuesMap.clear();
 	}
 
 
 	/*! Возвращает данные поля fieldName в строке row.
 
-		Чтобы получить данные, один раз обращается к БД.
-		Для этого создает DFD-описатель с помощью _selector(mt_plain, queryNumber),
-		генерирует SELECT-запрос, выполняет его и создает временную QstPlainQueryModel.
-		В модели и содержатся необходимые данные.
+	Чтобы получить данные, генерирует запрос с помощью _selector(),
+	выполняет его.
 
-		Возвращает QVariant(), если ячейка не найдена, или данные невалидны. */
+	Возвращает QVariant(), если поле с именем fieldName не найдено.
+
+	\sa SelectToMap()*/
 	QVariant QstAbstractModelHandler::SelectToValue(const QString fieldName,
 													const int &queryNumber,
-													const bool &extractItemName,
 													const int &row,
+													const bool &extractItemName,
 													const QSqlDatabase &db)
 	{
-		QstBatch batch = this->_selector(ModelPlain, queryNumber);
-		QstQueryDescriptor	descriptor(batch, QuerySelect, queryNumber);
+		QstBatch btch = this->_selector(queryNumber);
+		QstQueryDescriptor	descriptor(btch, QuerySelect, queryNumber);
 
-		int column = descriptor.batch().columnIndex(fieldName, extractItemName);
+		int column = btch.columnIndex(fieldName, extractItemName);
 
 		return _selectToValue(row, column, descriptor, db);
 	}
 
-	/*! Возвращает данные полей, чьи заголовки перечислены в списке fieldNamesList.
+	/*! Возвращает данные полей, переданных в fieldNamesList.
 
-		Чтобы получить данные всех полей, один раз обращается к БД.
+	Чтобы получить данные, генерирует запрос с помощью _selector(),
+	выполняет его.
 
-		Принцип тот же, что и у функции SelectToValue(QString, int, int, QSqlDatabase),
-	только для множества полей. */
-	QVariantMap QstAbstractModelHandler::SelectToMap(const QStringList &fieldNamesList,
-													 const int &queryNumber,
-													 const bool &extractItemName,
+	\sa SelectToValue()*/
+	QVariantMap QstAbstractModelHandler::SelectToMap(const int &queryNumber,
+													 const QStringList &fieldNamesList,
 													 const int &row,
+													 const bool &extractItemName,
 													 const QSqlDatabase &db)
 	{
-		QstBatch batch = this->_selector(ModelPlain, queryNumber);
-		QstQueryDescriptor	descriptor(batch, QuerySelect, queryNumber);
+		QstBatch btch = this->_selector(queryNumber);
+		QstQueryDescriptor	descriptor(btch, QuerySelect, queryNumber);
 
 		return _selectToMap(fieldNamesList, descriptor, extractItemName, row, db);
 	}
 
-	/*! Генерирует INSERT-запрос, описанный в _inserter(), и выполняет его. */
+	/*! Генерирует INSERT-запрос, описанный в _inserter(), выполняет его.
+
+	\sa SelectToValue(), SelectToMap(), Update(), Delete(), Exec()*/
 	bool QstAbstractModelHandler::Insert(const int &queryNumber,
 										 const QSqlDatabase &db)
 	{
 		Q_ASSERT(db.isOpen());
 
-		QstBatch batch = this->_inserter(queryNumber);
-		QstQueryDescriptor	descriptor(batch, QueryInsert, queryNumber);
+		QstBatch btch = this->_inserter(queryNumber);
 
 		QSqlQuery			query(db);
 
-		QstQueryGenerator gen(descriptor.batch(), descriptor.queryType());
+		QstQueryGenerator gen(btch, QueryInsert);
 #ifdef QT_DEBUG
-		qDebug() << "For the Insert function,";
-		qDebug() << "query of type" << descriptor.queryType() << "and number" << queryNumber << "will be:";
+		qDebug() << "For the Insert function, queryType == QueryInsert ";
+		qDebug() << "and queryNumber == " << queryNumber << " query will be:";
 		qDebug() << gen.query();
 #endif
 
@@ -675,23 +605,22 @@ namespace Qst
 		return query.exec();
 	}
 
-	/*! Генерирует UPDATE-запрос, описанный в _updater(), и выполняет его. */
+	/*! Генерирует UPDATE-запрос, описанный в _updater(), выполняет его.
+
+	\sa SelectToValue(), SelectToMap(), Insert(), Delete(), Exec()*/
 	bool QstAbstractModelHandler::Update(const int &queryNumber,
 										 const QSqlDatabase &db)
 	{
 		Q_ASSERT(db.isOpen());
 
-		QstBatch batch = this->_updater(queryNumber);
-		QstQueryDescriptor	descriptor(batch, QueryUpdate, queryNumber);
-
-		Q_ASSERT(descriptor.queryType() == QueryUpdate);
+		QstBatch btch = this->_updater(queryNumber);
 
 		QSqlQuery			query(db);
-		QstQueryGenerator gen(descriptor.batch(), descriptor.queryType());
+		QstQueryGenerator gen(btch, QueryUpdate);
 
 #ifdef QT_DEBUG
-		qDebug() << "For the Update function,";
-		qDebug() << "query of type" << descriptor.queryType() << "and number" << queryNumber << "will be:";
+		qDebug() << "For the Update function, queryType == QueryUpdate ";
+		qDebug() << "and queryNumber == " << queryNumber << " query will be:";
 		qDebug() << gen.query();
 #endif
 
@@ -701,23 +630,22 @@ namespace Qst
 		return query.exec();
 	}
 
-	/*! Генерирует DELETE-запрос, описанный в _deleter(), и выполняет его. */
+	/*! Генерирует DELETE-запрос, описанный в _deleter(), выполняет его.
+
+	\sa SelectToValue(), SelectToMap(), Update(), Insert(), Exec()*/
 	bool QstAbstractModelHandler::Delete(const int &queryNumber,
 										 const QSqlDatabase &db)
 	{
 		Q_ASSERT(db.isOpen());
 
-		QstBatch batch = this->_deleter(queryNumber);
-		QstQueryDescriptor	descriptor(batch, QueryDelete, queryNumber);
-
-		Q_ASSERT(descriptor.queryType() == QueryDelete);
+		QstBatch btch = this->_deleter(queryNumber);
 
 		QSqlQuery			query(db);
+		QstQueryGenerator gen(btch, QueryDelete);
 
-		QstQueryGenerator gen(descriptor.batch(), descriptor.queryType());
 #ifdef QT_DEBUG
-		qDebug() << "For the Delete function,";
-		qDebug() << "query of type" << descriptor.queryType() << "and number" << queryNumber << "will be:";
+		qDebug() << "For the Delete function, queryType == QueryDelete ";
+		qDebug() << "and queryNumber == " << queryNumber << " query will be:";
 		qDebug() << gen.query();
 #endif
 
@@ -727,23 +655,22 @@ namespace Qst
 		return query.exec();
 	}
 
-	/*! Выполняет хранимую процедуру, описанную функцией _executor(). */
+	/*! Генерирует EXEC-запрос, описанный в _executor(), выполняет его.
+
+	\sa SelectToValue(), SelectToMap(), Update(), Insert(), Delete() */
 	bool QstAbstractModelHandler::Exec(const int &queryNumber,
 									   const QSqlDatabase &db)
 	{
 		Q_ASSERT(db.isOpen());
 
-		QstBatch batch = this->_executor(queryNumber);
-		QstQueryDescriptor	descriptor(batch, QueryExecute, queryNumber);
-
-		Q_ASSERT(descriptor.queryType() == QueryExecute);
+		QstBatch btch = this->_executor(queryNumber);
 
 		QSqlQuery	query(db);
+		QstQueryGenerator gen(btch, QueryExecute);
 
-		QstQueryGenerator gen(descriptor.batch(), descriptor.queryType());
 #ifdef QT_DEBUG
-		qDebug() << "For the Exec function,";
-		qDebug() << "query of type" << descriptor.queryType() << "and number" << queryNumber << "will be:";
+		qDebug() << "For the Exec function, queryType == QueryExecute ";
+		qDebug() << "and queryNumber == " << queryNumber << " query will be:";
 		qDebug() << gen.query();
 #endif
 
@@ -753,191 +680,106 @@ namespace Qst
 		return query.exec();
 	}
 
-	/*! Удаляет текущую во view строку из БД, обновляет содержимое модели.
-
-	  Функция предполагает, что _deleter() содержит следующий фильтр:
-	  \code
-	  batch << QstField(<Ключевое_поле_в_БД>, value(ID_VALUE, QstValue(nt_null)), fp_where);
-	  \endcode
-	*/
-	bool QstAbstractModelHandler::DeleteCurrent(QAbstractItemView * view,
-												const QSqlDatabase &db)
+	/*! Геренирует и возвращает запрос соответствующего типа с номером queryType. */
+	QString QstAbstractModelHandler::generateQuery(const QueryType &queryType,
+												   const int &queryNumber)
 	{
-		QVariant id = keyValueOfCurrent(view);
-		bool res = false;
-
-		if (id.isValid())
-		{
-			QstValue oldId = value(ID_VALUE);
-			setValue(ID_VALUE, id);
-			res = Delete();
-			setValue(ID_VALUE, oldId);
-		}
-		return res;
-	}
-
-	/*! Удаляет текущую в comboBox строку из БД, обновляет содержимое модели.
-
-	  Функция предполагает, что _deleter() содержит следующий фильтр:
-	  \code
-	  batch << QstField(<Ключевое_поле_в_БД>, value(ID_VALUE, QstValue(nt_null)), fp_where);
-	  \endcode
-	*/
-	bool QstAbstractModelHandler::DeleteCurrent(QComboBox * comboBox,
-												const QSqlDatabase &db)
-	{
-		QVariant id = keyValueOfCurrent(comboBox);
-		bool res = false;
-
-		if (id.isValid())
-		{
-			QstValue oldId = value(ID_VALUE);
-			setValue(ID_VALUE, id);
-			res = Delete();
-			setValue(ID_VALUE, oldId);
-		}
-		return res;
-	}
-
-	/*! Генерирует и возвращает SELECT-запрос. */
-	QString QstAbstractModelHandler::SelectQuery(const int &queryNumber,
-												 const ModelType &type) const
-	{
-		QstBatch batch = this->_selector(type, queryNumber);
-		QstQueryDescriptor	descriptor(batch, QuerySelect, queryNumber);
-		QstQueryGenerator gen(descriptor.batch(), descriptor.queryType());
+		QstBatch btch = batch(queryType, queryNumber);
+		QstQueryGenerator	gen(btch, queryType);
 		return gen.query();
 	}
 
-	/*! Генерирует и возвращает INSERT-запрос. */
-	QString QstAbstractModelHandler::InsertQuery(const int &queryNumber) const
-	{
-		QstBatch batch = this->_inserter(queryNumber);
-		QstQueryDescriptor	descriptor(batch, QueryInsert, queryNumber);
-		QstQueryGenerator gen(descriptor.batch(), descriptor.queryType());
-		return gen.query();
-	}
-
-	/*! Генерирует и возвращает UPDATE-запрос. */
-	QString QstAbstractModelHandler::UpdateQuery(const int &queryNumber) const
-	{
-		QstBatch batch = this->_updater(queryNumber);
-		QstQueryDescriptor	descriptor(batch, QueryUpdate, queryNumber);
-		QstQueryGenerator gen(descriptor.batch(), descriptor.queryType());
-		return gen.query();
-	}
-
-	/*! Генерирует и возвращает DELETE-запрос. */
-	QString QstAbstractModelHandler::DeleteQuery(const int &queryNumber) const
-	{
-		QstBatch batch = this->_deleter(queryNumber);
-		QstQueryDescriptor	descriptor(batch, QueryDelete, queryNumber);
-		QstQueryGenerator gen(descriptor.batch(), descriptor.queryType());
-		return gen.query();
-	}
-
-	/*! Генерирует и возвращает EXEC-запрос. */
-	QString QstAbstractModelHandler::ExecQuery(const int &queryNumber) const
-	{
-		QstBatch batch = this->_executor(queryNumber);
-		QstQueryDescriptor	descriptor(batch, QueryExecute, queryNumber);
-		QstQueryGenerator gen(descriptor.batch(), descriptor.queryType());
-		return gen.query();
-	}
-
-	/*! Возвращает указатель на сохраненную модель.
-
-		Если источника sorceName не найдено, или указатель на модель равен NULL,
-		выпадает в Q_ASSERT(). */
+	/*! Возвращает указатель на модель данных. */
 	QAbstractItemModel *QstAbstractModelHandler::pModel()
 	{
 		return _modelDescriptor.pModel();
 	}
 
-	/*! Возвращает константный указатель на сохраненную модель.
-
-		Если источника sorceName не найдено, или указатель на модель равен NULL,
-		выпадает в Q_ASSERT(). */
+	/*! Возвращает константный указатель модель данных. */
 	QAbstractItemModel *QstAbstractModelHandler::pModel() const
 	{
 		return _modelDescriptor.pModel();
 	}
 
-	/*! Возвращает дескриптор модели, содержащейся в источнике данных sourceName.
+	/*! Возвращает дескриптор модели.
 
-		Если источника sorceName не найдено, выпадает в Q_ASSERT().
-
-	\sa QstModelDescriptor */
+	\sa QstSpecial::QstModelDescriptor */
 	QstModelDescriptor QstAbstractModelHandler::modelDescriptor() const
 	{
 		return _modelDescriptor;
 	}
 
+	/*! Возвращает QstBatch для запроса типа queryType с номером queryNumber. */
+	QstBatch QstAbstractModelHandler::batch(const QueryType &queryType,
+											const int &queryNumber)
+	{
+		switch (queryType)
+		{
+		case QuerySelect:  return this->_selector(queryNumber);
+		case QueryInsert:  return this->_inserter(queryNumber);
+		case QueryUpdate:  return this->_updater(queryNumber);
+		case QueryDelete:  return this->_deleter(queryNumber);
+		case QueryExecute: return this->_executor(queryNumber);
+
+		default: Q_ASSERT_X(false, "batch", "Unknown QueryType.");
+		};
+
+		return QstBatch();
+	}
+
 	// ------------------------------------------------------------------------- //
 
-	/*! Возвращает описатель для запроса SELECT-типа по виду модели и номеру запроса.
+	/*! Возвращает QstBatch (DFD-описатель) для запроса SELECT-типа.
 
-		Функция переопределяется в наследующем классе с нужным функционалом.
+		Функция, при необходимости, должна быть переопределена в классе-наследнике.
 
-		Неявно вызывается при создании и перезагрузке источника данных (модель, view/comboBox),
-		а так же из функций SelectToValue(), SelectToMap(), keyValueOfRow(),
-		keyValueOfCurrent(), keyValueOfView(), keyValueOfComboBox(), setValueFromView(),
-		setValueFromComboBox().
-
-	\sa QstQueryDescriptor, QstField, QstValue, DFDL */
-	QstBatch QstAbstractModelHandler::_selector(const ModelType &modelType,
-												const int &queryNumber) const
+		Вызывается функцией reload(), функциями SelectToValue(), SelectToMap(),
+		keyValueOfRow(), keyValueOfCurrent(), keyValueOfView(), keyValueOfComboBox(),
+		selectedKeysOfView(), функциями batch(), generateQuery(). */
+	QstBatch QstAbstractModelHandler::_selector(const int &queryNumber) const
 	{
 		Q_ASSERT(false);
 		return QstBatch();
 	}
 
-	/*! Возвращает описатель для запроса INSERT-типа по номеру запроса.
+	/*! Возвращает QstBatch (DFD-описатель) для запроса INSERT-типа.
 
-		Функция переопределяется в наследующем классе с нужным функционалом.
+		Функция, при необходимости, должна быть переопределена в классе-наследнике.
 
-		Неявно вызывается из функции Insert().
-
-	\sa QstQueryDescriptor, QstField, QstValue, DFDL */
+		Вызывается из функции Insert(), функциями batch(), generateQuery(). */
 	QstBatch  QstAbstractModelHandler::_inserter(const int &queryNumber) const
 	{
 		Q_ASSERT(false);
 		return QstBatch();
 	}
 
-	/*! Возвращает описатель для запроса UPDATE-типа по номеру запроса.
+	/*! Возвращает QstBatch (DFD-описатель) для запроса UPDATE-типа.
 
-		Функция переопределяется в наследующем классе с нужным функционалом.
+		Функция, при необходимости, должна быть переопределена в классе-наследнике.
 
-		Неявно вызывается из функции Update().
-
-	\sa QstQueryDescriptor, QstField, QstValue, DFDL */
+		Вызывается из функции Update(), функциями batch(), generateQuery().*/
 	QstBatch QstAbstractModelHandler::_updater(const int &queryNumber) const
 	{
 		Q_ASSERT(false);
 		return QstBatch();
 	}
 
-	/*! Возвращает описатель для запроса DELETE-типа по номеру запроса.
+	/*! Возвращает QstBatch (DFD-описатель) для запроса DELETE-типа.
 
-		Функция переопределяется в наследующем классе с нужным функционалом.
+		Функция, при необходимости, должна быть переопределена в классе-наследнике.
 
-		Неявно вызывается из функций Delete(), DeleteCurrent().
-
-	\sa QstQueryDescriptor, QstField, QstValue, DFDL */
+		Вызывается из функции Delete(), функциями batch(), generateQuery().*/
 	QstBatch QstAbstractModelHandler::_deleter(const int &queryNumber) const
 	{
 		Q_ASSERT(false);
 		return QstBatch();
 	}
 
-	/*! Возвращает описатель для запроса EXEC-типа по номеру запроса.
+	/*! Возвращает QstBatch (DFD-описатель) для запроса EXEC-типа.
 
-		Функция переопределяется в наследующем классе с нужным функционалом.
+		Функция, при необходимости, должна быть переопределена в классе-наследнике.
 
-		Неявно вызывается из функции Exec().
-
-	\sa QstQueryDescriptor, QstField, QstValue, DFDL */
+		Вызывается из функции Exec(), функциями batch(), generateQuery().*/
 	QstBatch QstAbstractModelHandler::_executor(const int &queryNumber) const
 	{
 		Q_ASSERT(false);
@@ -946,25 +788,20 @@ namespace Qst
 
 
 	void QstAbstractModelHandler::_loadModelDescriptor(QAbstractItemModel * model,
-													   const ModelType &type,
+													   const ModelType &modelType,
 													   const int &queryNumber,
-													   const bool &useQueryNumber,
 													   const QSqlDatabase &db)
 	{
 		Q_ASSERT(model != NULL);
 		Q_ASSERT(db.isOpen());
 
-		QstBatch batch;
-		if (useQueryNumber)
-			batch = this->_selector(type, queryNumber);
-		else
-			batch = this->_selector(type);
+		QstBatch btch = this->_selector(queryNumber);
 
-		QstQueryDescriptor queryDescriptor(batch, QuerySelect, queryNumber);
+		QstQueryDescriptor queryDescriptor(btch, QuerySelect, queryNumber);
 
-		_modelDescriptor = QstModelDescriptor(model, type, queryDescriptor);
+		_modelDescriptor = QstModelDescriptor(model, modelType, queryDescriptor);
 
-		if (type == ModelPlain)
+		if (modelType == ModelPlain)
 			_loadModel(queryDescriptor, (QstPlainQueryModel*)model, db);
 		else
 			_loadModel(queryDescriptor, (QstTreeQueryModel*)model, db);
@@ -972,7 +809,7 @@ namespace Qst
 
 
 	void QstAbstractModelHandler::_reload(QAbstractItemModel * model,
-										  const ModelType &type,
+										  const ModelType &modelType,
 										  const int &queryNumber,
 										  const bool &reloadQueryNumber,
 										  const QSqlDatabase &db)
@@ -981,7 +818,7 @@ namespace Qst
 
 		if (!_modelDescriptor.isValid())
 		{
-			_loadModelDescriptor(model, type, queryNumber, reloadQueryNumber, db);
+			_loadModelDescriptor(model, modelType, queryNumber, db);
 		}
 		else
 		{
@@ -992,21 +829,21 @@ namespace Qst
 			if (reloadQueryNumber)	newQueryNumber = queryNumber;
 			else					newQueryNumber = _modelDescriptor.queryDescriptor().queryNumber();
 
-			QstBatch batch = this->_selector(type, newQueryNumber);
-			QstQueryDescriptor newQueryDescriptor(batch, QuerySelect, newQueryNumber);
+			QstBatch btch = this->_selector(newQueryNumber);
+			QstQueryDescriptor newQueryDescriptor(btch, QuerySelect, newQueryNumber);
 
 			_modelDescriptor.setQueryDescriptor(newQueryDescriptor);
 
 			if (!model)
 			{
-				if (type == ModelPlain)
+				if (modelType == ModelPlain)
 					_loadModel(newQueryDescriptor, (QstPlainQueryModel*)pModel(), db);
 				else
 					_loadModel(newQueryDescriptor, (QstTreeQueryModel*)pModel(), db);
 			}
 			else
 			{
-				if (type == ModelPlain)
+				if (modelType == ModelPlain)
 					_loadModel(newQueryDescriptor, (QstPlainQueryModel*)model, db);
 				else
 					_loadModel(newQueryDescriptor, (QstTreeQueryModel*)model, db);
@@ -1014,9 +851,11 @@ namespace Qst
 				_modelDescriptor.setModel(model);
 			}
 
-			_modelDescriptor.setModelType(type);
+			_modelDescriptor.setModelType(modelType);
 			_modelDescriptor.modelizeViews();
 		}
+
+	_loaded = true;
 	}
 
 
@@ -1043,11 +882,11 @@ namespace Qst
 											  QstTreeQueryModel * model,
 											  const QSqlDatabase &db)
 	{
-		QstBatch batch = descriptor.batch();
+		QstBatch btch = descriptor.batch();
 
-		model->setKeyField(batch.columnIndex(RolePrimaryKey));
+		model->setKeyField(btch.columnIndex(RolePrimaryKey));
 
-		int parentFieldIndex = batch.columnIndex(RoleParentKey);
+		int parentFieldIndex = btch.columnIndex(RoleParentKey);
 		if (parentFieldIndex != -1)
 			model->setParentField(parentFieldIndex);
 
@@ -1064,8 +903,8 @@ namespace Qst
 
 	template<class T> void QstAbstractModelHandler::_setViewSettings(T * view, const QstQueryDescriptor &descriptor)
 	{
-		QstBatch batch = descriptor.batch();
-		QstFieldsVector fields = batch.fields();
+		QstBatch btch = descriptor.batch();
+		QstFieldVector fields = btch.fields();
 
 		int columnIndex;
 
@@ -1075,7 +914,7 @@ namespace Qst
 
 			if (rField.isVisible())
 			{
-				columnIndex = batch.columnIndex(rField.name());
+				columnIndex = btch.columnIndex(rField.name());
 				Q_ASSERT(columnIndex != -1);
 
 				view->setColumnWidth(columnIndex, rField.columnWidth());
@@ -1087,7 +926,7 @@ namespace Qst
 			else
 				if (rField.isInvisible())
 				{
-				columnIndex = batch.columnIndex(rField.name());
+				columnIndex = btch.columnIndex(rField.name());
 				Q_ASSERT(columnIndex != -1);
 
 				view->setColumnHidden(columnIndex, true);
@@ -1097,8 +936,8 @@ namespace Qst
 
 	void QstAbstractModelHandler::_setListViewSettings(QListView * view, const QstQueryDescriptor &descriptor)
 	{
-		QstBatch batch = descriptor.batch();
-		QstFieldsVector fields = batch.fields();
+		QstBatch btch = descriptor.batch();
+		QstFieldVector fields = btch.fields();
 
 		int columnIndex;
 
@@ -1108,7 +947,7 @@ namespace Qst
 
 			if (rField.isVisible())
 			{
-				columnIndex = batch.columnIndex(rField.name());
+				columnIndex = btch.columnIndex(rField.name());
 				Q_ASSERT(columnIndex != -1);
 
 				view->model()->setHeaderData(columnIndex,
@@ -1119,7 +958,7 @@ namespace Qst
 			else
 				if (rField.isInvisible())
 				{
-				columnIndex = batch.columnIndex(rField.name());
+				columnIndex = btch.columnIndex(rField.name());
 				Q_ASSERT(columnIndex != -1);
 			}
 		};
@@ -1173,7 +1012,7 @@ namespace Qst
 		QstPlainQueryModel	queryModel;
 		queryModel.setQuery(gen.query(), db);
 
-		QstBatch batch = descriptor.batch();
+		QstBatch btch = descriptor.batch();
 
 		QVariantMap		resMap;
 		int				column;
@@ -1181,7 +1020,7 @@ namespace Qst
 
 		for (int i = 0; i < fieldNamesList.size(); ++i)
 		{
-			column	= batch.columnIndex(fieldNamesList[i], extractItemName);
+			column	= btch.columnIndex(fieldNamesList[i], extractItemName);
 			index	= queryModel.index(row, column, QModelIndex());
 
 			if (index.isValid())
@@ -1190,4 +1029,5 @@ namespace Qst
 
 		return resMap;
 	}
+
 }	// End of namespace Qst

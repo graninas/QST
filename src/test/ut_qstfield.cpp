@@ -1,5 +1,5 @@
 /****************************************************************************
-** QST 0.4.1 pre-alpha
+** QST 0.4.2a beta
 ** Copyright (C) 2010 Granin A.S.
 ** Contact: Granin A.S. (graninas@gmail.com)
 **
@@ -28,6 +28,8 @@
 
 #include "ut_qstfield.h"
 
+using namespace Qst;
+
 typedef QstField T;
 
 Q_DECLARE_METATYPE(QstField)
@@ -39,10 +41,14 @@ Q_DECLARE_METATYPE(FieldPurposes)
 Q_DECLARE_METATYPE(FieldRole)
 
 
-/*!
-	\class ut_QstField
-	\brief Модульный тест для класса QstField. См. ut_qstfield.cpp .
-*/
+namespace QstTest
+{
+
+
+	/*!
+		\class ut_QstField
+		\brief Модульный тест для класса QstField.
+	*/
 
 
 ut_QstField::ut_QstField()
@@ -107,8 +113,8 @@ void ut_QstField::columnTitle_data()
 	QTest::newRow("1")	<< T()										<< QString(tr(""));
 	QTest::newRow("2")	<< T("SomeName")							<< QString(tr("SomeName"));
 	QTest::newRow("3")	<< T("SomeName", FieldVisible, "EngTitle")	<< QString(tr("EngTitle"));
-	QTest::newRow("4")	<< T("SomeName", FieldInvisible, "РусНазв")	<< QString(tr("РусНазв"));
-	QTest::newRow("5")	<< T("SomeName", FieldInvisible, "РусEng")	<< QString(tr("РусEng"));
+	QTest::newRow("4")	<< T("SomeName", FieldInvisible, "Р СѓСЃРќР°Р·РІ")	<< QString(tr("Р СѓСЃРќР°Р·РІ"));
+	QTest::newRow("5")	<< T("SomeName", FieldInvisible, "Р СѓСЃEng")	<< QString(tr("Р СѓСЃEng"));
 	QTest::newRow("6")	<< T("SomeName", QstValue())				<< QString(tr(""));
 	QTest::newRow("7")	<< T("SomeName", QstValue(), QstValue())	<< QString(tr(""));
 	QTest::newRow("8")	<< T(QstValue())							<< QString(tr(""));
@@ -159,7 +165,7 @@ void ut_QstField::purposes_data()
 	QTest::newRow("2")	<< T(QString("SN"))								<< (PurposeSelect | PurposeSelect);
 	QTest::newRow("3")	<< T("SN")										<< (PurposeSelect | PurposeSelect);
 	QTest::newRow("4")	<< T("SN", FieldVisible)						<< (PurposeSelect | PurposeSelect);
-	QTest::newRow("5")	<< T("SN", QstValue())							<< (PurposeAllValued_Mask | PurposeAllValued_Mask);
+	QTest::newRow("5")	<< T("SN", QstValue())							<< (PurposeValued_Mask | PurposeValued_Mask);
 	QTest::newRow("6")	<< T("SN", QstValue())							<< (PurposeWhere | PurposeInsert | PurposeUpdate | PurposeParameter);
 	QTest::newRow("7")	<< T("SN", QstValue(), PurposeModifying_Mask)	<< (PurposeInsert | PurposeUpdate);
 	QTest::newRow("8")	<< T("SN", QstValue(), PurposeInsert)			<< (PurposeInsert | PurposeInsert);
@@ -167,10 +173,10 @@ void ut_QstField::purposes_data()
 	QTest::newRow("10")	<< T("SN",
 							 QstValue(),
 							 QstValue(),
-							 PurposeAllValued_Mask)						<< (PurposeWhere | PurposeWhere);
+							 PurposeValued_Mask)						<< (PurposeWhere | PurposeWhere);
 	QTest::newRow("11")	<< T(QstValue())								<< (PurposeParameter | PurposeParameter);
-	QTest::newRow("12")	<< T(QstValue(), PurposeAllValued_Mask)			<< (PurposeParameter | PurposeParameter);
-	QTest::newRow("13")	<< T("SN", PurposeAllValued_Mask)				<< (PurposeWhere | PurposeInsert | PurposeUpdate | PurposeParameter);
+	QTest::newRow("12")	<< T(QstValue(), PurposeValued_Mask)			<< (PurposeParameter | PurposeParameter);
+	QTest::newRow("13")	<< T("SN", PurposeValued_Mask)				<< (PurposeWhere | PurposeInsert | PurposeUpdate | PurposeParameter);
 	QTest::newRow("14")	<< T("SN", PurposeOrderBy)						<< (PurposeOrderBy | PurposeOrderBy);
 	QTest::newRow("15")	<< T("SN", PurposeOrderBy | PurposeGroupBy)		<< (PurposeOrderBy | PurposeGroupBy);
 }
@@ -196,7 +202,7 @@ void ut_QstField::role_data()
 	QTest::newRow("6")	<< T(RoleParentKey, "SN", FieldVisible)		<< (RoleParentKey);
 	QTest::newRow("7")	<< T("SN", QstValue())						<< (RoleNone);
 	QTest::newRow("8")	<< T(QstValue())							<< (RoleNone);
-	QTest::newRow("9")	<< T("SN", PurposeAllValued_Mask)			<< (RoleNone);
+	QTest::newRow("9")	<< T("SN", PurposeValued_Mask)			<< (RoleNone);
 }
 
 void ut_QstField::value()
@@ -223,7 +229,7 @@ void ut_QstField::value_data()
 	QTest::newRow("9")	<< T("SN", QstValue(), QstValue("2"))		<< QstValue(QVariant());
 	QTest::newRow("10")	<< T(QstValue())							<< QstValue();
 	QTest::newRow("11")	<< T(QstValue(QDate(10,1,22)))				<< QstValue(QDate(10,1,22));
-	QTest::newRow("12")	<< T("SN", PurposeAllValued_Mask)			<< QstValue();
+	QTest::newRow("12")	<< T("SN", PurposeValued_Mask)			<< QstValue();
 }
 
 void ut_QstField::value1()
@@ -250,7 +256,7 @@ void ut_QstField::value1_data()
 	QTest::newRow("9")	<< T("SN", QstValue(), QstValue("2"))		<< QstValue();
 	QTest::newRow("10")	<< T(QstValue())							<< QstValue();
 	QTest::newRow("11")	<< T(QstValue(QDate(10,1,22)))				<< QstValue(QDate(10,1,22));
-	QTest::newRow("12")	<< T("SN", PurposeAllValued_Mask)			<< QstValue();
+	QTest::newRow("12")	<< T("SN", PurposeValued_Mask)			<< QstValue();
 }
 
 
@@ -278,7 +284,7 @@ void ut_QstField::value2_data()
 	QTest::newRow("9")	<< T("SN", QstValue(), QstValue("2"))		<< QstValue("2");
 	QTest::newRow("10")	<< T(QstValue())							<< QstValue();
 	QTest::newRow("11")	<< T(QstValue(QDate(10,1,22)))				<< QstValue();
-	QTest::newRow("12")	<< T("SN", PurposeAllValued_Mask)			<< QstValue();
+	QTest::newRow("12")	<< T("SN", PurposeValued_Mask)			<< QstValue();
 }
 
 void ut_QstField::hasValue()
@@ -305,7 +311,7 @@ void ut_QstField::hasValue_data()
 	QTest::newRow("9")	<< T("SN", QstValue(), QstValue("2"))		<< true;
 	QTest::newRow("10")	<< T(QstValue())							<< true;
 	QTest::newRow("11")	<< T(QstValue(QDate(10,1,22)))				<< true;
-	QTest::newRow("12")	<< T("SN", PurposeAllValued_Mask)			<< false;
+	QTest::newRow("12")	<< T("SN", PurposeValued_Mask)			<< false;
 }
 
 void ut_QstField::hasValue1()
@@ -332,7 +338,7 @@ void ut_QstField::hasValue1_data()
 	QTest::newRow("9")	<< T("SN", QstValue(), QstValue("2"))		<< true;
 	QTest::newRow("10")	<< T(QstValue())							<< true;
 	QTest::newRow("11")	<< T(QstValue(QDate(10,1,22)))				<< true;
-	QTest::newRow("12")	<< T("SN", PurposeAllValued_Mask)			<< false;
+	QTest::newRow("12")	<< T("SN", PurposeValued_Mask)			<< false;
 }
 
 void ut_QstField::hasValue2()
@@ -359,7 +365,7 @@ void ut_QstField::hasValue2_data()
 	QTest::newRow("9")	<< T("SN", QstValue(), QstValue("2"))		<< true;
 	QTest::newRow("10")	<< T(QstValue())							<< false;
 	QTest::newRow("11")	<< T(QstValue(QDate(10,1,22)))				<< false;
-	QTest::newRow("12")	<< T("SN", PurposeAllValued_Mask)			<< false;
+	QTest::newRow("12")	<< T("SN", PurposeValued_Mask)			<< false;
 }
 
 void ut_QstField::isBinaryFilter()
@@ -386,7 +392,7 @@ void ut_QstField::isBinaryFilter_data()
 	QTest::newRow("9")	<< T("SN", QstValue(), QstValue("2"))		<< true;
 	QTest::newRow("10")	<< T(QstValue())							<< false;
 	QTest::newRow("11")	<< T(QstValue(QDate(10,1,22)))				<< false;
-	QTest::newRow("12")	<< T("SN", PurposeAllValued_Mask)			<< false;
+	QTest::newRow("12")	<< T("SN", PurposeValued_Mask)			<< false;
 }
 
 void ut_QstField::isVisible()
@@ -481,7 +487,7 @@ void ut_QstField::isService_data()
 	QTest::newRow("7")	<< T("SN", QstValue())						<< false;
 	QTest::newRow("8")	<< T("SN", QstValue(), QstValue("2"))		<< false;
 	QTest::newRow("9")	<< T(QstValue())							<< false;
-	QTest::newRow("10")	<< T("SN", PurposeAllValued_Mask)			<< false;
+	QTest::newRow("10")	<< T("SN", PurposeValued_Mask)			<< false;
 }
 
 void ut_QstField::isValuesValid()
@@ -508,7 +514,7 @@ void ut_QstField::isValuesValid_data()
 	QTest::newRow("9")	<< T("SN", QstValue(), QstValue("2"))		<< false;
 	QTest::newRow("10")	<< T(QstValue())							<< false;
 	QTest::newRow("11")	<< T(QstValue(QDate(10,1,22)))				<< true;
-	QTest::newRow("12")	<< T("SN", PurposeAllValued_Mask)			<< false;
+	QTest::newRow("12")	<< T("SN", PurposeValued_Mask)			<< false;
 }
 
 void ut_QstField::isValid()
@@ -536,8 +542,10 @@ void ut_QstField::isValid_data()
 	QTest::newRow("10")	<< T("SN", QstValue(), QstValue("2"))		<< false;
 	QTest::newRow("11")	<< T(QstValue())							<< false;
 	QTest::newRow("12")	<< T(QstValue(QDate(10,1,22)))				<< true;
-	QTest::newRow("13")	<< T("SN", PurposeAllValued_Mask)			<< false;
+	QTest::newRow("13")	<< T("SN", PurposeValued_Mask)			<< false;
 	QTest::newRow("14")	<< T(QString(), QstValue(3.14))				<< false;
 	QTest::newRow("15")	<< T(QString("SN"), QstValue())				<< false;
 
 }
+
+} // End of namespace QstTest

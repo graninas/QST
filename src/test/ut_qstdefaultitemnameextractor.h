@@ -1,5 +1,5 @@
 /****************************************************************************
-** QST 0.4.1 pre-alpha
+** QST 0.4.2a beta
 ** Copyright (C) 2010 Granin A.S.
 ** Contact: Granin A.S. (graninas@gmail.com)
 **
@@ -34,7 +34,8 @@
 
 #include "qst/qstdefaultitemnameextractor.h"
 
-using namespace Qst;
+namespace QstTest
+{
 
 class ut_QstDefaultItemNameExtractor : public QObject
 {
@@ -48,5 +49,9 @@ private slots:
 	void extractItemName();
 	void extractItemName_data();
 };
+
+
+} // End of namespace QstTest
+
 
 #endif // UT_QSTDEFAULTITEMNAMEEXTRACTOR_H

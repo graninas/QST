@@ -1,0 +1,62 @@
+0.4 pre-alpha to 0.4.2a beta Changes
+
+- Документация кода обновлена.
+- Добавлен класс QstIf.
+- Изменены имена типов, перечислений:
+* PurposeAllValued_Mask на PurposeValued_Mask
+* QstFieldsVector на QstFieldVector
+* QstValuesVector на QstValueVector
+- Из модуля qstglobal.h убрана строка #include <QDebug>.
+- Добавлен параметр QST_VALUE_NULL_SUBSTITUTE_BY_DEFAULT, установлен в #undefined.
+- У перечислений уточнены числовые значения.
+- Добавлено перечисление MatchPolicy.
+- Добавлено перечисление QueryClause. (В будущих версиях перечисления FieldPurpose и QueryClause будут пересмотрены.)
+- Добавлены типы QueryClauses, QueryClauseMap.
+- Пересмотрены пространства имен.
+- Удалена функция QstModelDescriptor::listView().
+
+-= QstAbstractModelHandler =-
+
+- У класса появился флаг _isLoaded, указывающий, была ли загружена модель.
+- Косметические исправления внутри функций.
+- Для генерирующих функий (_selector() и др.), а так же для функций вызова (Insert, Update и др.) у параметров queryNumber убрано значение по умолчанию. Поменяны местами 3 и 4 параметры.
+- У функции _selector() убран параметр ModelType.
+
+- Убраны функции:
+* reload(QstPlainQueryModel*, QSqlDatabase &)
+* reload(QstTreeQueryModel*, QSqlDatabase &)
+* rowCount()
+* DeleteCurrent(), SelectQuery(), InsertQuery(), UpdateQuery(), DeleteQuery(), ExecQuery()
+
+- Добавлены функции:
+* reload(QSqlDatabase &)
+* isLoaded()
+* setValuesMap()
+* valuesMap()
+* generateQuery()
+* batch()
+
+-= QstBatch =-
+
+- Исправлена ошибка со строкой #include при подключении qstdefaultitemnameextractor.h и qstrolevisibility.h.
+- Созданы классы QstFieldIf и QstSourceIf на основе QstIf.
+
+Добавлены функции и операторы:
+* addSource(QstSourceIf)
+* addField(QstFieldIf)
+* operator<<(QstSourceIf)
+* operator<<(QstFieldIf)
+
+-= QstDBConnection =-
+- Добавлена возможность устанавливать порт. Для этого добавлены соответствующие варианты функций подключения и тестирования, а так же функция setPort().
+- Конструктор класса теперь может принимать название драйвера.
+- Название драйвера по умолчанию вынесено в константу QST_DEFAULT_DATABASE_DRIVER.
+
+-= QstField =-
+- Изменены параметры по умолчанию у некоторых конструкторов. (Ширина колонки, видимость поля и др.).
+- Добавлен тип QstFieldNamesList (В последующих версиях имя может быть изменено на QstFieldNameList).
+
+-= QstQueryComposer =-
+- Исправлены ошибки, связаннае с генерацией секции WHERE и EXEC.
+- Добавлена функция queryParts().
+- Убраны классы EIllegalBetweenFoUsing и EInvalidSelectClause.

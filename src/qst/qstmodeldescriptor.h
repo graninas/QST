@@ -1,5 +1,5 @@
 /****************************************************************************
-** QST 0.4.1 pre-alpha
+** QST 0.4.2a beta
 ** Copyright (C) 2010 Granin A.S.
 ** Contact: Granin A.S. (graninas@gmail.com)
 **
@@ -42,6 +42,9 @@
 namespace Qst
 {
 
+namespace QstSpecial
+{
+
 class QstModelDescriptor
 {
 public:
@@ -82,8 +85,6 @@ public:
 	QAbstractItemView * view(const int &index = 0) const;
 	QComboBox		  * comboBox(const int &index = 0);
 	QComboBox		  * comboBox(const int &index = 0) const;
-	QListView		  * listView(const int &index = 0);
-	QListView		  * listView(const int &index = 0) const;
 
 	ModelType modelType() const;
 	void setModelType(const ModelType & modelType);
@@ -100,6 +101,8 @@ public:
 
 
 
-};
+}	// End of namespace QstSpecial
+
+}	// End of namespace Qst
 
 #endif // QSTMODELDESCRIPTOR_H

@@ -1,5 +1,5 @@
 /****************************************************************************
-** QST 0.4.1 pre-alpha
+** QST 0.4.2a beta
 ** Copyright (C) 2010 Granin A.S.
 ** Contact: Granin A.S. (graninas@gmail.com)
 **
@@ -28,15 +28,21 @@
 
 #include "ut_qstquerygenerator.h"
 
+using namespace Qst;
+
 Q_DECLARE_METATYPE(QstQueryGenerator)
 Q_DECLARE_METATYPE(QstBatch)
 Q_DECLARE_METATYPE(QueryType)
+
+namespace QstTest
+{
+
 
 typedef QstQueryGenerator T;
 
 /*!
 	\class ut_QstQueryGenerator
-	\brief Модульный тест для класса SqlGen. См. ut_qstquerygenerator.cpp .
+	\brief Модульный тест для класса QstQueryGenerator.
 */
 
 ut_QstQueryGenerator::ut_QstQueryGenerator()
@@ -93,6 +99,24 @@ void ut_QstQueryGenerator::initTestCase()
 			<< QstField("Field5", QstValue(3.14, FunctorGreaterEqualOrNull), PurposeWhere | PurposeInsert)
 			<< QstField("Field6", QstValue(true), PurposeWhere)
 			;
+
+
+	m_b7	<< "vView"
+			<< QstField(RolePrimaryKey, "Key")
+			<< QstField("Name", FieldVisible, "Наименование", 120)
+			<< QstField("ID", QstValue());
+
+	m_b8	<< "vView"
+			<< QstField(RolePrimaryKey, "Key")
+			<< QstField("Name", FieldVisible, "Наименование", 120)
+			<< QstField("ID", QstValue(15));
+
+	m_b9	<< "vView"
+			<< QstField(RolePrimaryKey, "Key")
+			<< QstField("Name", FieldVisible, "Наименование", 120)
+			<< QstField("ID", QstValue())
+			<< QstField("OrderDate", QstValue(), QstValue())
+			;
 }
 
 
@@ -144,6 +168,11 @@ void ut_QstQueryGenerator::query_data()
 	QTest::newRow("29")	<< 	T(m_b6, QueryExecute)	<<  QString("EXEC vView '30.07.1986'");
 	QTest::newRow("30")	<< 	T(m_b6, QueryUpdate)	<<  QString("UPDATE vView SET Field1 = convert(datetime, '30.07.1986', 104), Field2 = NULL, Field3 = 10 WHERE Field3 >= 10 OR Field3 IS NULL AND Field4 BETWEEN convert(datetime, '20.03.2010', 104) AND convert(datetime, '01.04.2010', 104) AND Field5 >= 3.14 OR Field5 IS NULL AND Field6 = true");
 	QTest::newRow("31")	<< 	T(m_b6, QueryDelete)	<<  QString("DELETE FROM vView WHERE Field3 >= 10 OR Field3 IS NULL AND Field4 BETWEEN convert(datetime, '20.03.2010', 104) AND convert(datetime, '01.04.2010', 104) AND Field5 >= 3.14 OR Field5 IS NULL AND Field6 = true");
+
+	QTest::newRow("32")	<< 	T(m_b7, QuerySelect)	<<  QString("SELECT Name, Key FROM vView");
+	QTest::newRow("33")	<< 	T(m_b8, QuerySelect)	<<  QString("SELECT Name, Key FROM vView WHERE ID = 15");
+	QTest::newRow("34")	<< 	T(m_b9, QuerySelect)	<<  QString("SELECT Name, Key FROM vView");
+
 }
 
 void ut_QstQueryGenerator::batch()
@@ -250,3 +279,4 @@ void ut_QstQueryGenerator::isValid_data()
 }
 
 
+} // End of namespace QstTest

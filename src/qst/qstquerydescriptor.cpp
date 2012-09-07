@@ -1,5 +1,5 @@
 /****************************************************************************
-** QST 0.4.1 pre-alpha
+** QST 0.4.2a beta
 ** Copyright (C) 2010 Granin A.S.
 ** Contact: Granin A.S. (graninas@gmail.com)
 **
@@ -31,6 +31,29 @@
 namespace Qst
 {
 
+namespace QstSpecial
+{
+
+	/*!
+	\class QstQueryDescriptor
+	\brief
+		Служебный класс, используемый в QstAbstractModelHandler для хранения
+		описателей. Представляет собой полный описатель SQL-запроса
+		(пакет QstBatch + номер пакета в хэндлере + вид запроса QueryType).
+
+	\inmodule Qst
+	\inmodule QstSpecial
+	*/
+
+	/*! Конструктор по умолчанию. */
+	QstQueryDescriptor::QstQueryDescriptor()
+	 : _batch(QstBatch()),
+	 _type(QuerySelect),
+	 _queryNumber(0)
+	{
+	}
+
+	/*! Основной конструктор. */
 	QstQueryDescriptor::QstQueryDescriptor(const QstBatch &batch,
 										   const QueryType &type,
 										   const int &queryNumber)
@@ -41,41 +64,42 @@ namespace Qst
 	{
 	}
 
-	QstQueryDescriptor::QstQueryDescriptor()
-	 : _batch(QstBatch()),
-	 _type(QuerySelect),
-	 _queryNumber(0)
-	{
-	}
-
-
+	/*! Возвращает пакет QstBatch. */
 	QstBatch QstQueryDescriptor::batch() const
 	{
 		return _batch;
 	}
 
+	/*! Устанавливает пакет QstBatch. */
 	void QstQueryDescriptor::setBatch(const QstBatch &batch)
 	{
 		_batch = batch;
 	}
 
+	/*! Возвращает тип запроса. */
 	QueryType QstQueryDescriptor::queryType() const
 	{
 		return _type;
 	}
 
+	/*! Устанавливает тип запроса. */
 	void QstQueryDescriptor::setQueryType(const QueryType &type)
 	{
 		_type = type;
 	}
 
+	/*! Возвращает номер пакета в классе-хэндлере. */
 	int QstQueryDescriptor::queryNumber() const
 	{
 		return _queryNumber;
 	}
 
+	/*! Устанавливает номер пакета в классе-хэндлере. */
 	void QstQueryDescriptor::setQueryNumber(const int &queryNumber)
 	{
 		_queryNumber = queryNumber;
 	}
-}
+
+}	// End of namespace QstSpecial
+
+}	// End of namespace Qst

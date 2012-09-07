@@ -1,5 +1,5 @@
 /****************************************************************************
-** QST 0.4.1 pre-alpha
+** QST 0.4.2a beta
 ** Copyright (C) 2010 Granin A.S.
 ** Contact: Granin A.S. (graninas@gmail.com)
 **
@@ -32,25 +32,27 @@
 #include "qstglobal.h"
 #include "qstbatch.h"
 
-
 namespace Qst
+{
+
+namespace QstSpecial
 {
 
 class QstQueryDescriptor
 {
 private:
 
-	QstBatch		_batch;
+	QstBatch	_batch;
 	QueryType	_type;
-	int				_queryNumber;
+	int			_queryNumber;
 
 
 public:
+	QstQueryDescriptor();
+
 	QstQueryDescriptor(const QstBatch &batch,
 					   const QueryType &type,
 					   const int &queryNumber);
-
-	QstQueryDescriptor();
 
 	QstBatch		batch() const;
 	void			setBatch(const QstBatch &batch);
@@ -64,6 +66,8 @@ public:
 };
 
 
-};
+}	// End of namespace QstSpecial
+
+}	// End of namespace Qst
 
 #endif // QSTQUERYDESCRIPTOR_H

@@ -1,5 +1,5 @@
 /****************************************************************************
-** QST 0.4.1 pre-alpha
+** QST 0.4.2a beta
 ** Copyright (C) 2010 Granin A.S.
 ** Contact: Granin A.S. (graninas@gmail.com)
 **
@@ -28,31 +28,67 @@
 
 #include "qstdefaultitemnameextractor.h"
 
-#include "qst/qstgenconstants.h"
+#include "qstgenconstants.h"
 #include <QRegExp>
 #include <QStringList>
 
 namespace Qst
 {
 
+	/*!
+		\class QstDefaultItemNameExtractor
+		\brief
+		Класс позволяет извлекать фактическое имя поля из строковой константы,
+		например, "price" из "count(price)".
+		Класс используется в QstBatch, если не передан другой экстрактор.
 
+		\inmodule Qst
+
+		Поддерживаются следующие выражения:
+
+\verbatim
+Строковая константа         Извлеченное имя
+""                          ""
+"ID"                        "ID"
+"[ID]"                      "ID"
+"([ID])"                    "ID"
+"[(ID)]"                    "ID"
+"count(ID)"                 "ID"
+"key as ID"                 "ID"
+"key AS ID"                 "ID"
+"count(key) AS ID"          "ID"
+"count([key]) AS ID"        "ID"
+"max(ID)"                   "ID"
+"min(ID)"                   "ID"
+"sum(ID)"                   "ID"
+"FieldName alias"           "alias"
+"count(key) alias"          "alias"
+"FieldName [alias]"         "alias"
+"count(key)  [alias]"       "alias"
+\endverbatim
+	*/
+
+/*! Конструктор по умолчанию. */
 QstDefaultItemNameExtractor::QstDefaultItemNameExtractor()
 	:
 	_str(QString())
 {
 }
 
+/*! Конструктор, принимающий строковую константу, содержащую фактическое имя поля. */
 QstDefaultItemNameExtractor::QstDefaultItemNameExtractor(const QString &str)
 	:
 	_str(str)
 {
 }
 
+/*! Ивзлекает из сохраненной ранее строковой константы фактическое имя поля. */
 QString QstDefaultItemNameExtractor::extractItemName() const
 {
 	return extractItemName(_str);
 }
 
+/*! Извлекает из переданной строковой константы фактическое имя поля. */
 QString QstDefaultItemNameExtractor::extractItemName(const QString &str) const
 {
 	if (str.isEmpty())

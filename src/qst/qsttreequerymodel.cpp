@@ -1,5 +1,5 @@
 /****************************************************************************
-** QST 0.4.1 pre-alpha
+** QST 0.4.2a beta
 ** Copyright (C) 2010 Granin A.S.
 ** Contact: Granin A.S. (graninas@gmail.com)
 **
@@ -30,8 +30,19 @@
 
 #include <QSqlRecord>
 
-#include <QDebug>
+namespace Qst
+{
 
+	/*!
+		\class QstTreeQueryModel
+		\brief
+		Древовидная модель данных. Использует первичный ключ и ключ
+		на родительскую запись для создания древовидной структуры.
+
+		\inmodule Qst
+	*/
+
+/*! Основной конструктор и конструктор по умолчанию. */
 QstTreeQueryModel::QstTreeQueryModel(QObject* parent)
 	:
 	QAbstractItemModel(parent),
@@ -41,6 +52,7 @@ QstTreeQueryModel::QstTreeQueryModel(QObject* parent)
 {
 }
 
+/*! Деструктор. Рекурсивно удаляет элементы древовидной структуты. */
 QstTreeQueryModel::~QstTreeQueryModel()
 {
 	if (_root)
@@ -48,21 +60,31 @@ QstTreeQueryModel::~QstTreeQueryModel()
 	_root = NULL;
 }
 
+/*! Устанавливает индекс ключевого поля.
+
+	Индекс используется в классах QstBatch и QstAbstractModelHandler. */
 void QstTreeQueryModel::setKeyField(const int &keyField)
 {
 	_keyField = keyField;
 }
 
+/*! Устанавливает индекс ключа на родительскую запись.
+
+	Индекс используется в классах QstBatch и QstAbstractModelHandler. */
 void QstTreeQueryModel::setParentField(const int &parentField)
 {
 	_parentField = parentField;
 }
 
+/*! Ограничивает использование QSqlQuery, поскольку это может привести
+	к неопределенному поведению. */
 void QstTreeQueryModel::setQuery(const QSqlQuery & query)
 {
-	Q_ASSERT_X(false, "QstTreeQueryModel::setQuery(const QString& query)", "Empty procedure");
+	Q_ASSERT_X(false, "setQuery", "Forbidden function.");
 }
 
+/*! Устанавливает запрос, подключается к базе данных, получает данные
+	и создает древовидную структуру. */
 void QstTreeQueryModel::setQuery(const QString& query, const QSqlDatabase &db)
 {
 	_query = QSqlQuery(query, db);
@@ -87,10 +109,12 @@ void QstTreeQueryModel::setQuery(const QString& query, const QSqlDatabase &db)
 }
 
 
+/*! Возвращает количество дочерних элементов у parent.
+
+	Если parent инвалидный, возвращает количество дочерних элементов
+	для коренного элемента.*/
 int QstTreeQueryModel::rowCount(const QModelIndex& parent) const
 {
-	//	if (!_root)
-	//		return QModelIndex();
 	Q_ASSERT(_root != NULL);
 
 	QstTreeItem *parentItem;
@@ -105,10 +129,12 @@ int QstTreeQueryModel::rowCount(const QModelIndex& parent) const
 	return parentItem->childCount();
 }
 
+/*! Возвращает количество колонок у parent.
+
+	Если parent инвалидный, возвращает количество колонок
+	для коренного элемента*/
 int QstTreeQueryModel::columnCount(const QModelIndex& parent) const
 {
-	//	if (!_root)
-	//		return QModelIndex();
 	Q_ASSERT(_root != NULL);
 
 	QstTreeItem *item;
@@ -123,6 +149,7 @@ int QstTreeQueryModel::columnCount(const QModelIndex& parent) const
 	return item->colsCount();
 }
 
+/*! Возвращает флаги элемента. */
 Qt::ItemFlags QstTreeQueryModel::flags(const QModelIndex &index) const
 {
 	if (!index.isValid())
@@ -131,10 +158,9 @@ Qt::ItemFlags QstTreeQueryModel::flags(const QModelIndex &index) const
 	return Qt::ItemIsEnabled | Qt::ItemIsSelectable;
 }
 
+/*! Возвращает данные элемента. */
 QVariant QstTreeQueryModel::data(const QModelIndex& index, int role) const
 {
-	//	if (!_root)
-	//		return QModelIndex();
 	Q_ASSERT(_root != NULL);
 
 	if (!index.isValid())
@@ -148,6 +174,7 @@ QVariant QstTreeQueryModel::data(const QModelIndex& index, int role) const
 	return item->data(index.column());
 }
 
+/*! Возвращает заголовок элемента. */
 QVariant QstTreeQueryModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
 	if (!_root) return QVariant();
@@ -158,10 +185,9 @@ QVariant QstTreeQueryModel::headerData(int section, Qt::Orientation orientation,
 	return QVariant();
 }
 
+/*! Возвращает модельный индекс по заданным значениям row, column и parent. */
 QModelIndex QstTreeQueryModel::index(int row, int column, const QModelIndex& parent) const
 {
-	//	if (!_root)
-	//		return QModelIndex();
 		Q_ASSERT(_root != NULL);
 
 	if (!hasIndex(row, column, parent))
@@ -181,10 +207,9 @@ QModelIndex QstTreeQueryModel::index(int row, int column, const QModelIndex& par
 		return QModelIndex();
 }
 
+/*! Возвращает родительский элемент. */
 QModelIndex QstTreeQueryModel::parent(const QModelIndex& index) const
 {
-//	if (!_root)
-//		return QModelIndex();
 	Q_ASSERT(_root != NULL);
 
 	if (!index.isValid())
@@ -199,6 +224,7 @@ QModelIndex QstTreeQueryModel::parent(const QModelIndex& index) const
 	return createIndex(parentItem->row(), 0, parentItem);
 }
 
+/*! Устанавливает заголовок для секции. */
 bool QstTreeQueryModel::setHeaderData(int section, Qt::Orientation orientation,
 								 const QVariant & value, int role)
 {
@@ -215,19 +241,24 @@ bool QstTreeQueryModel::setHeaderData(int section, Qt::Orientation orientation,
 	return true;
 }
 
+/*! Удалет дерево данных. */
 void QstTreeQueryModel::clear()
 {
 	delete _root;
 	_root = NULL;
-
-	qDebug() << "Tree is deleted.";
 }
 
+/*! Всегда возвращает false, поскольку дерево строится сразу по всем данным.
+
+	Функция добавлена для совместимости. */
 bool QstTreeQueryModel::canFetchMore ( const QModelIndex & parent ) const
 {
 	return false;
 }
 
+/*! Ничего не делает.
+
+	Функция добавлена для совместимости. */
 void QstTreeQueryModel::fetchMore ( const QModelIndex & parent)
 {
 	// Do nothing
@@ -261,4 +292,6 @@ void QstTreeQueryModel::_createTree()
 			item->appendChild(newQstTreeItem);
 		}
 	}
+}
+
 }

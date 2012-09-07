@@ -1,5 +1,5 @@
 /****************************************************************************
-** QST 0.4.1 pre-alpha
+** QST 0.4.2a beta
 ** Copyright (C) 2010 Granin A.S.
 ** Contact: Granin A.S. (graninas@gmail.com)
 **
@@ -27,6 +27,49 @@
 ****************************************************************************/
 
 #include "qstglobal.h"
+
+/*!
+  \mainpage Qst SQL Tools
+
+  Лицензии: GPLv3, LGPLv3
+
+
+  QST (Qst SQL Tools) - это ORM-библиотека, призванная упростить работу
+  с базами данных и улучшить код.
+
+  - Генерация и выполнение простых SQL-запросов (SELECT, INSERT, UPDATE, DELETE, EXEC).
+  - Концепция декларативных описателей (DFD, Declarative Field Descriptor) для запросов SQL.
+  - Наборы описателей для генерации разных запросов в пределах одного класса-хэндлера.
+  - Обращение к полям таблицы БД по имени, извлечение данных как одного поля, так и целого списка полей.
+  - Автоматическая настройка Qt-представлений (QTableView, QTreeView, QComboBox, QListView)
+  по параметрам, заданным в описателе запроса.
+  - Извлечение данных выделенной в Qt-представлении строки (нескольких строк).
+  - Древовидная модель данных.
+
+
+  Для данной версии библиотеки существует пример - программа TradeDB 0.4.2 special.
+
+
+  По вопросам использования и лицензирования, а так же по иным вопросам обращаться
+  к автору:
+
+  Гранин Александр
+  graninas@gmail.com
+
+
+  Страница проекта на SourceForge: http://sourceforge.net/projects/qstsqltools/
+
+  Баг-трекер: http://sourceforge.net/tracker/?group_id=292796&atid=1237498
+
+  Тема на форуме prog.org.ru: http://www.prog.org.ru/topic_11637_0.html
+
+
+  Feature Requests: http://sourceforge.net/tracker/?group_id=292796&atid=1237501
+
+  Support Requests: http://sourceforge.net/tracker/?group_id=292796&atid=1237499
+
+*/
+
 
 namespace Qst
 {

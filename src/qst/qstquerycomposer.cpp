@@ -1,5 +1,5 @@
 /****************************************************************************
-** QST 0.4.1 pre-alpha
+** QST 0.4.2a beta
 ** Copyright (C) 2010 Granin A.S.
 ** Contact: Granin A.S. (graninas@gmail.com)
 **
@@ -33,6 +33,16 @@
 namespace Qst
 {
 
+	/*!
+	\class QstQueryComposer
+	\brief
+		Класс отвечает за компоновку конкретных секций SQL-запроса по переданным
+		в него полям QstField.
+
+	\inmodule Qst
+	*/
+
+/*! Конструктор по умолчанию. */
 QstQueryComposer::QstQueryComposer()
 :	_fieldsClause(""),
 	_sourcesClause(""),
@@ -43,6 +53,7 @@ QstQueryComposer::QstQueryComposer()
 {
 }
 
+/*! Очищает все поля. */
 void QstQueryComposer::clear()
 {
 	_fieldsClause = "";
@@ -64,11 +75,13 @@ void QstQueryComposer::clear()
 	_parameters.clear();
 }
 
+/*! Добавляет источник данных SQL-запроса. */
 void QstQueryComposer::addSource(const QString &source)
 {
 	_sources.append(source);
 }
 
+/*! Добавляет поле для секции SELECT. */
 void QstQueryComposer::addSelectClauseField(const QstField &field)
 {
 	if (field.purposes() & PurposeSelect)
@@ -77,6 +90,7 @@ void QstQueryComposer::addSelectClauseField(const QstField &field)
 	}
 }
 
+/*! Добавляет поля других секций, а так же параметры процедуры и значения для UPDATE, INSERT. */
 void QstQueryComposer::addStuffField(const QstField &field)
 {
 	if (field.purposes() & (PurposeInsert | PurposeUpdate))
@@ -91,9 +105,20 @@ void QstQueryComposer::addStuffField(const QstField &field)
 		if (field.purposes() & PurposeWhere)
 		{
 			if (field.isBinaryFilter())
+			{
+				if (field.value(OrderFirst).isNull()
+					|| field.value(OrderSecond).isNull())
+				return;
+
 				_addBetweenCondition(field.name(), field.value(OrderFirst), field.value(OrderSecond));
+			}
 			else
+			{
+				if (!field.value().isValid())
+					return;
+
 				_addCondition(field.name(), field.value());
+			}
 		}
 
 	if (field.purposes() & PurposeSelect)
@@ -113,14 +138,19 @@ void QstQueryComposer::addStuffField(const QstField &field)
 
 	if (field.purposes() & PurposeParameter)
 	{
-		_addParameter(field.value());
+		QstValue resValue = field.value();
+		if (!resValue.isValid())
+			resValue = QstValue(Null);
+
+		_addParameter(resValue);
 	}
 }
 
-QString QstQueryComposer::query(const QueryType &sqlType) const
+/*! Компонует запрос типа queryType. */
+QString QstQueryComposer::query(const QueryType &queryType) const
 {
 	QString resQuery;
-	switch (sqlType)
+	switch (queryType)
 	{
 	case QuerySelect:
 		resQuery = _SELECT_SQL_QUERY();
@@ -142,6 +172,53 @@ QString QstQueryComposer::query(const QueryType &sqlType) const
 	};
 
 return resQuery.simplified();
+}
+
+/*! Компонует секции, переданные в clauses и возвращает массив результатов. */
+QueryClauseMap QstQueryComposer::queryParts(const QueryClauses &clauses) const
+{
+	QueryClauseMap map;
+
+	if (clauses.testFlag(ClauseSelect))
+		map[ClauseSelect] = _SELECT();
+
+	if (clauses.testFlag(ClauseFrom))
+		map[ClauseFrom] = _FROM();
+
+	if (clauses.testFlag(ClauseWhere))
+		map[ClauseWhere] = _WHERE();
+
+	if (clauses.testFlag(ClauseInsertInto))
+		map[ClauseInsertInto] = _INSERT();
+
+	if (clauses.testFlag(ClauseUpdate))
+		map[ClauseUpdate] = _UPDATE();
+
+	if (clauses.testFlag(ClauseOrderBy))
+		map[ClauseOrderBy] = _ORDER_BY();
+
+	if (clauses.testFlag(ClauseGroupBy))
+		map[ClauseGroupBy] = _GROUP_BY();
+
+	if (clauses.testFlag(ClauseParameters))
+		map[ClauseParameters] = _PARAMETERS();
+
+	if (clauses.testFlag(ClauseHaving))
+		map[ClauseHaving] = _HAVING();
+
+	if (clauses.testFlag(ClauseValues))
+		map[ClauseValues] = _VALUES();
+
+	if (clauses.testFlag(ClauseSet))
+		map[ClauseSet] = _SET();
+
+	if (clauses.testFlag(ClauseDelete))
+		map[ClauseDelete] = _DELETE();
+
+	if (clauses.testFlag(ClauseExecute))
+		map[ClauseExecute] = _EXECUTE();
+
+	return map;
 }
 
 void QstQueryComposer::_addVariantBetweenCondition(const QString &field,
@@ -178,8 +255,8 @@ void QstQueryComposer::_addDateBetweenCondition(const QString &field,
 {
 	_StringTemplate functorTemplate = _functorToStringTemplate(FunctorBetween);
 
-	QString strDate1 = DATE_CONVERT.arg(value1.toString(ValueBordered, NullNotSubstitute, BracesNotUse));
-	QString strDate2 = DATE_CONVERT.arg(value2.toString(ValueBordered, NullNotSubstitute, BracesNotUse));
+	QString strDate1 = DATE_CONVERT.arg(value1.toString(ValueBordered));
+	QString strDate2 = DATE_CONVERT.arg(value2.toString(ValueBordered));
 	QString strCondition = functorTemplate.stringTemplate().arg(field, strDate1, strDate2);
 
 	_conditions.push_back(strCondition);
@@ -228,7 +305,8 @@ void QstQueryComposer::_addBetweenCondition(const QString &field,
 	const QVariant &rVarVal1 = value1.value();
 	const QVariant &rVarVal2 = value2.value();
 
-	if (rVarVal1.type() == QVariant::Date)
+	if (rVarVal1.type() == QVariant::Date
+		|| rVarVal1.type() == QVariant::DateTime)
 		_addDateBetweenCondition(field, rVarVal1, rVarVal2);
 	else
 		if (rVarVal1.type() == QVariant::ByteArray || rVarVal1.type() == QVariant::String)
@@ -242,9 +320,6 @@ void QstQueryComposer::_addBetweenCondition(const QString &field,
 void QstQueryComposer::_addCondition(const QString &field,
 										  const QstValue &value)
 {
-	if (!value.isValid())
-		return;
-
 	const QVariant &rVarVal = value.value();
 
 	if (rVarVal.type() == QVariant::Date)
@@ -269,16 +344,16 @@ void QstQueryComposer::_addInsertValue(const QString &field,
 
 	if (value.value().type() == QVariant::Date)
 	{
-		strValue = DATE_CONVERT.arg(value.toString(ValueBordered, NullNotSubstitute, BracesNotUse));
+		strValue = DATE_CONVERT.arg(value.toString(ValueBordered));
 	}
 	else
 	if (value.value().type() == QVariant::String
 		|| value.value().type() == QVariant::ByteArray
 		|| value.value().type() == QVariant::DateTime)
 
-		strValue = value.toString(ValueBordered, NullSubstitute, BracesNotUse);
+		strValue = value.toString(ValueBordered, BracesNotUse, NullSubstitute);
 	else
-		strValue = value.toString(ValueNotBordered, NullSubstitute, BracesNotUse);
+		strValue = value.toString(ValueNotBordered, BracesNotUse, NullSubstitute);
 
 	_insertValues.insert(field, strValue);
 }
@@ -292,7 +367,7 @@ void QstQueryComposer::_addUpdateValue(const QString &field,
 
 		if (value.value().type() == QVariant::Date)
 		{
-			strValue = DATE_CONVERT.arg(value.toString(ValueBordered, NullNotSubstitute, BracesNotUse));
+			strValue = DATE_CONVERT.arg(value.toString(ValueBordered));
 		}
 		else
 
@@ -300,9 +375,9 @@ void QstQueryComposer::_addUpdateValue(const QString &field,
 			|| value.value().type() == QVariant::ByteArray
 			|| value.value().type() == QVariant::DateTime)
 
-			strValue = value.toString(ValueBordered, NullSubstitute, BracesNotUse);
+			strValue = value.toString(ValueBordered, BracesNotUse, NullSubstitute);
 		else
-			strValue = value.toString(ValueNotBordered, NullSubstitute, BracesNotUse);
+			strValue = value.toString(ValueNotBordered, BracesNotUse, NullSubstitute);
 
 		_updateValues.insert(field, strValue);
 	}
@@ -311,7 +386,7 @@ void QstQueryComposer::_addUpdateValue(const QString &field,
 void QstQueryComposer::_addParameter(const QstValue &value)
 {
 	if (!value.isValid() || value.isNull())
-		_parameters.push_back(value.toString(ValueNotBordered, NullSubstitute, BracesNotUse));
+		_parameters.push_back(value.toString(ValueNotBordered, BracesNotUse, NullSubstitute));
 	else
 	{
 		if (value.value().type() == QVariant::String
@@ -319,11 +394,11 @@ void QstQueryComposer::_addParameter(const QstValue &value)
 			|| value.value().type() == QVariant::Date
 			|| value.value().type() == QVariant::DateTime)
 
-			_parameters.push_back(value.toString(ValueBordered, NullSubstitute, BracesNotUse));
+			_parameters.push_back(value.toString(ValueBordered, BracesNotUse, NullSubstitute));
 
 		else
 
-			_parameters.push_back(value.toString(ValueNotBordered, NullSubstitute, BracesNotUse));
+			_parameters.push_back(value.toString(ValueNotBordered, BracesNotUse, NullSubstitute));
 	}
 }
 
@@ -357,28 +432,36 @@ QstQueryComposer::_StringTemplate QstQueryComposer::_functorToStringTemplate(con
 
 	switch(functor)
 	{
-			case FunctorLike:			return _StringTemplate(2, " %1 LIKE %2 ");
-			case FunctorEqual:			return _StringTemplate(2, " %1 = %2 ");
-			case FunctorNotEqual:		return _StringTemplate(2, " %1 <> %2 ");
-			case FunctorLess:			return _StringTemplate(2, " %1 < %2 ");
-			case FunctorGreater:		return _StringTemplate(2, " %1 > %2 ");
-			case FunctorLessEqual:		return _StringTemplate(2, " %1 <= %2 ");
-			case FunctorGreaterEqual:	return _StringTemplate(2, " %1 >= %2 ");
-			case FunctorBetween:		return _StringTemplate(3, " %1 BETWEEN %2 AND %3 ");
-			case FunctorIsNull:		return _StringTemplate(1, " %1 IS NULL ");
-			case FunctorIsNotNull:	return _StringTemplate(1, " %1 IS NOT NULL ");
-	 case FunctorNotEqualOrNull:		return _StringTemplate(2, " %1 <> %2 OR %1 IS NULL ");
-	 case FunctorEqualOrNull:			return _StringTemplate(2, " %1 == %2 OR %1 IS NULL ");
-	 case FunctorLessOrNull:			return _StringTemplate(2, " %1 < %2 OR %1 IS NULL ");
-	 case FunctorGreaterOrNull:		return _StringTemplate(2, " %1 > %2 OR %1 IS NULL ");
-	 case FunctorLessEqualOrNull:	return _StringTemplate(2, " %1 <= %2 OR %1 IS NULL ");
-	 case FunctorGreaterEqualOrNull:	return _StringTemplate(2, " %1 >= %2 OR %1 IS NULL ");
-	 case FunctorLikeOrNull:			return _StringTemplate(2, " %1 LIKE %2 OR %1 IS NULL ");
+	case FunctorLike:			return _StringTemplate(2, " %1 LIKE %2 ");
+	case FunctorEqual:			return _StringTemplate(2, " %1 = %2 ");
+	case FunctorNotEqual:		return _StringTemplate(2, " %1 <> %2 ");
+	case FunctorLess:			return _StringTemplate(2, " %1 < %2 ");
+	case FunctorGreater:		return _StringTemplate(2, " %1 > %2 ");
+	case FunctorLessEqual:		return _StringTemplate(2, " %1 <= %2 ");
+	case FunctorGreaterEqual:	return _StringTemplate(2, " %1 >= %2 ");
+	case FunctorBetween:		return _StringTemplate(3, " %1 BETWEEN %2 AND %3 ");
+	case FunctorIsNull:			return _StringTemplate(1, " %1 IS NULL ");
+	case FunctorIsNotNull:		return _StringTemplate(1, " %1 IS NOT NULL ");
+	case FunctorNotEqualOrNull:		return _StringTemplate(2, " %1 <> %2 OR %1 IS NULL ");
+	case FunctorEqualOrNull:		return _StringTemplate(2, " %1 == %2 OR %1 IS NULL ");
+	case FunctorLessOrNull:			return _StringTemplate(2, " %1 < %2 OR %1 IS NULL ");
+	case FunctorGreaterOrNull:		return _StringTemplate(2, " %1 > %2 OR %1 IS NULL ");
+	case FunctorLessEqualOrNull:	return _StringTemplate(2, " %1 <= %2 OR %1 IS NULL ");
+	case FunctorGreaterEqualOrNull:	return _StringTemplate(2, " %1 >= %2 OR %1 IS NULL ");
+	case FunctorLikeOrNull:			return _StringTemplate(2, " %1 LIKE %2 OR %1 IS NULL ");
 
 
 	 case FunctorNone:	Q_ASSERT_X(false,
 							   "QstQueryComposer::_functorToStringTemplate",
 							   "Empty functor - no template available.");
+
+	case FunctorUnary_Mask:
+	case FunctorBinary_Mask:
+//	case FunctorTrinary_Mask:	// Закомментировано, т.к. содержит 1 функтор.
+	case FunctorCombined_Mask:
+		 Q_ASSERT_X(false,
+					"QstQueryComposer::_functorToStringTemplate",
+					"Too many Functors or unknown functor.");
 
 	};
 return _StringTemplate();

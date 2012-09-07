@@ -1,5 +1,5 @@
 /****************************************************************************
-** QST 0.4.1 pre-alpha
+** QST 0.4.2a beta
 ** Copyright (C) 2010 Granin A.S.
 ** Contact: Granin A.S. (graninas@gmail.com)
 **
@@ -34,8 +34,9 @@
 
 #include "qst/qstbatch.h"
 
-using namespace Qst;
 
+namespace QstTest
+{
 
 class ut_QstBatch : public QObject
 {
@@ -72,7 +73,10 @@ private slots:
 
 private:
 
-	QstBatch m_b1, m_b2, m_b3, m_b4, m_b5, m_b6;
+	Qst::QstBatch m_b1, m_b2, m_b3, m_b4, m_b5, m_b6;
 };
+
+} // End of namespace QstTest
+
 
 #endif // UT_QSTBATCH_H

@@ -1,5 +1,5 @@
 /****************************************************************************
-** QST 0.4.1 pre-alpha
+** QST 0.4.2a beta
 ** Copyright (C) 2010 Granin A.S.
 ** Contact: Granin A.S. (graninas@gmail.com)
 **
@@ -34,8 +34,8 @@
 
 #include "qst/qstvalue.h"
 
-using namespace Qst;
-
+namespace QstTest
+{
 
 class ut_QstValue : public QObject
 {
@@ -61,32 +61,36 @@ private slots:
 	void braces();
 	void braces_data();
 
-	void toString();		// ValueUnbordered,		NullFilled, NotUseBraces
+	void toString();		// ValueNotBordered, BracesNotUse, NullNotSubstitute / NullSubstitute (зависит от QST_VALUE_NULL_SUBSTITUTE_BY_DEFAULT)
 	void toString_data();
 
-	void toString1();		// ValueBordered, NullFilled, NotUseBraces
+	void toString1();		// ValueBordered, BracesNotUse, NullSubstitute
 	void toString1_data();
 
-	void toString2();		// ValueUnbordered,		NotNullFilled, NotUseBraces
+	void toString2();		// ValueNotBordered, BracesNotUse, NullNotSubstitute
 	void toString2_data();
 
-	void toString3();		// ValueBordered, NotNullFilled, NotUseBraces
+	void toString3();		// ValueBordered, BracesNotUse, NullNotSubstitute
 	void toString3_data();
 
-// -------------------------------------------------------------------------- //
-
-	void toString4();		// ValueUnbordered,		NullFilled, UseBraces
+	void toString4();		// ValueNotBordered, BracesUse, NullSubstitute
 	void toString4_data();
 
-	void toString5();		// ValueBordered, NullFilled, UseBraces
+	void toString5();		// ValueBordered, BracesUse, NullSubstitute
 	void toString5_data();
 
-	void toString6();		// ValueUnbordered,		NotNullFilled, UseBraces
+	void toString6();		// ValueNotBordered, BracesUse, NullNotSubstitute
 	void toString6_data();
 
-	void toString7();		// ValueBordered, NotNullFilled, UseBraces
+	void toString7();		// ValueBordered, BracesUse, NullNotSubstitute
 	void toString7_data();
 
+	void toString8();		// ValueNotBordered, BracesNotUse, NullSubstitute
+	void toString8_data();
+
 };
+
+} // End of namespace QstTest
+
 
 #endif // UT_QSTVALUE_H

@@ -1,5 +1,5 @@
 /****************************************************************************
-** QST 0.4.1 pre-alpha
+** QST 0.4.2a beta
 ** Copyright (C) 2010 Granin A.S.
 ** Contact: Granin A.S. (graninas@gmail.com)
 **
@@ -34,6 +34,9 @@
 #include <QSqlQuery>
 
 #include "qsttreeitem.h"
+
+namespace Qst
+{
 
 class QstTreeQueryModel : public QAbstractItemModel
 {
@@ -76,5 +79,7 @@ private:
 
 	void _createTree();
 };
+
+}
 
 #endif // QSTTREEQUERYMODEL_H

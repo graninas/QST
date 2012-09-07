@@ -1,5 +1,5 @@
 /****************************************************************************
-** QST 0.4.1 pre-alpha
+** QST 0.4.2a beta
 ** Copyright (C) 2010 Granin A.S.
 ** Contact: Granin A.S. (graninas@gmail.com)
 **
@@ -45,9 +45,6 @@ class QstQueryComposer
 {
 public:
 
-	class EIllegalBetweenFoUsing {};
-	class EInvalidSelectClause {};
-
 	typedef QMap<QString, QString>	ValuesMapType;
 
 public:
@@ -60,7 +57,9 @@ public:
 	void addSelectClauseField(const QstField &field);
 	void addStuffField(const QstField &field);
 
-	QString query(const QueryType &sqlType = QuerySelect) const;
+	QString query(const QueryType &queryType = QuerySelect) const;
+
+	QueryClauseMap queryParts(const QueryClauses &clauses) const;
 
 private:
 

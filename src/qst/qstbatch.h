@@ -1,5 +1,5 @@
 /****************************************************************************
-** QST 0.4.1 pre-alpha
+** QST 0.4.2a beta
 ** Copyright (C) 2010 Granin A.S.
 ** Contact: Granin A.S. (graninas@gmail.com)
 **
@@ -35,17 +35,19 @@
 #include <QList>
 #include <QMap>
 
-#include "qst/qstdefaultitemnameextractor.h"
-
-#include "qst/qstrolevisibility.h"
+#include "qstdefaultitemnameextractor.h"
+#include "qstrolevisibility.h"
+#include "qstif.h"
 
 namespace Qst
 {
 
-class QstBatch;
 
+class QstBatch;
 typedef QMap<QString, QstBatch> QstBatchMap;
 
+typedef QstIf<QstField> QstFieldIf;
+typedef QstIf<QString>	QstSourceIf;
 
 class QstBatch
 {
@@ -53,33 +55,51 @@ public:
 
 	typedef enum {SourcesNameList, SourcesBatch} SourcesType;
 
+private:
+
+	QStringList			_sources;
+	QString				_name;
+	QstFieldVector		_fields;
+
+	QstAbstractItemNameExtractor *	_itemExtractor;
+	QstDefaultItemNameExtractor		_defaultItemExtractor;
+
 public:
 	QstBatch(const QString name = QString());
 	QstBatch(QstAbstractItemNameExtractor * itemExtractor);
 
 	void addSource(const QString &source);
+	void addSource(const QstSourceIf &sourceIf);
 
 #ifdef QST_ALWAYS_EXTRACT_ITEM_NAME
 	void addField(const QstField &field, const bool &extractItemName = true);
+	void addField(const QstFieldIf &fieldIf, const bool &extractItemName = true);
 #else
 	void addField(const QstField &field, const bool &extractItemName = false);
+	void addField(const QstFieldIf &fieldIf, const bool &extractItemName = false);
 #endif
 
 	QStringList sources() const;
 
-	QstFieldsVector fields(const FieldPurposes &purposes = PurposeAll_Mask) const;
+	QstFieldVector fields(const FieldPurposes &purposes = PurposeAll_Mask) const;
 
 	void clear();
 	void clearSources();
 
 	bool isValid() const;
 
-// Returns -1 if no item matched
+#ifdef QST_ALWAYS_EXTRACT_ITEM_NAME
+	int columnIndex(const QString &fieldName, const bool &extractItemName = true) const;
+#else
 	int columnIndex(const QString &fieldName, const bool &extractItemName = false) const;
+#endif
 	int columnIndex(const FieldRole &role) const;
 
 	QstBatch & operator<<(const QString &source);
+	QstBatch & operator<<(const QstSourceIf &sourceIf);
+
 	QstBatch & operator<<(const QstField &field);
+	QstBatch & operator<<(const QstFieldIf &fieldIf);
 
 
 	friend bool operator == (const QstBatch &val1, const QstBatch &val2)
@@ -88,15 +108,6 @@ public:
 				&& val1.fields() == val2.fields();
 
 	}
-
-private:
-
-	QStringList			_sources;
-	QString				_name;
-	QstFieldsVector		_fields;
-
-	QstAbstractItemNameExtractor *	_itemExtractor;
-	QstDefaultItemNameExtractor		_defaultItemExtractor;
 
 private:
 

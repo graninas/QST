@@ -1,5 +1,5 @@
 /****************************************************************************
-** QST 0.4.1 pre-alpha
+** QST 0.4.2a beta
 ** Copyright (C) 2010 Granin A.S.
 ** Contact: Granin A.S. (graninas@gmail.com)
 **
@@ -32,7 +32,54 @@
 
 namespace Qst
 {
-// Конструктор по умолчанию.
+
+	/*!
+		\class QstField
+		\brief
+		Объекты класса QstField составляются в пакеты (QstBatch) и затем
+		непосредственно участвуют в генерации SQL-запросов.
+		Класс хранит имена полей для секций SELECT, ORDER BY, GROUP BY,
+		хранит имя поля и значение для секций WHERE, INSERT INTO / VALUES,
+		UPDATE / SET, а так же представляет	параметр хранимой процедуры.
+
+		\inmodule Qst
+
+		Каждый класс QstField имеет свое назначение (QstField::purposes()).
+		Поле может быть предназначено для нескольких секций сразу:
+		Qst::PurposeSelect | Qst::PurposeInsert,
+		Qst::PurposeParameter | Qst::PurposeWhere, однако обычно у поля всего
+		одно назначение. Чаще всего назначение задается по умолчанию и зависит
+		от выбранного конструктора QstField.  Есть конструкторы только
+		для секции SELECT, только для секции WHERE, только для
+		параметра процедуры. Есть общий конструктор для секций
+		INSERT/UPDATE, WHERE и для параметра процедуры.
+
+		У поля есть имя - QstField::name(), котрое интерпретируется в зависимости
+		от секции. Чаще всего оно представляет имя поля в БД.
+
+		Те объекты QstField, которые предназначены для секции SELECT, могут
+		быть снабжены дополнительной информацией, используемой при настройке
+		представлений (QTableView, QTreeView, QListView, QComboBox):
+			- видимость поля, невидимые поля отображаться не будут;
+			- название колонки для этого поля (переводится функцией tr());
+			- ширина колонки;
+			- ориентация колонки (почти не используется).
+
+		Подключаемые представления будут настраиваться в соответствии с этими
+		параметрами.
+
+		\attention в QComboBox и QListView отображается первое поле с
+		параметром isVisible() == true.
+
+		\sa QstAbstractModelHandler
+
+		Поле может иметь роль ключевого: первичного ключа или ключа
+		на родительскую запись (RolePrimaryKey, RoleParentKey).
+		Для ключевых полей есть специальный конструктор.
+		Может быть только по одному полю с каждой ролью.
+	*/
+
+/*! Конструктор по умолчанию. Создает инвалидный QstField. */
 QstField::QstField()
 	:
 	_name(QString()),
@@ -45,9 +92,9 @@ QstField::QstField()
 {
 }
 
-// Конструктор для служебных ключевых полей.
-// const * char версия для параметра columnTitle. Переводится
-// функцией tr.
+/*! Конструктор для служебных ключевых полей.
+	const * char версия для параметра columnTitle. Переводится функцией tr.
+*/
 QstField::QstField(const FieldRole &role,
 				  const QString &name,
 				  const FieldVisibility &visibility,
@@ -65,9 +112,9 @@ QstField::QstField(const FieldRole &role,
 {
 }
 
-// Конструктор для поля в секции SELECT
-// const * char версия для параметра columnTitle. Переводится
-// функцией tr.
+/*! Конструктор для поля в секции SELECT
+	const * char версия для параметра columnTitle. Переводится функцией tr.
+*/
 QstField::QstField(const QString &name,
 				   const FieldVisibility &visibility,
 				   const char *columnTitle,
@@ -86,9 +133,8 @@ QstField::QstField(const QString &name,
 		_columnTitle = name;
 }
 
-// Конструктор для одинарного фильтра;
-// для поля в секциях INSERT/UPDATE;
-// для параметров процедуры.
+/*! Конструктор для одинарного фильтра; для поля в секциях INSERT/UPDATE;
+	для параметров процедуры. */
 QstField::QstField(const QString &name,
 				   const QstValue &value,
 				   const FieldPurposes purposes)
@@ -104,7 +150,7 @@ QstField::QstField(const QString &name,
 	_values.append(value);
 }
 
-// Конструктор для бинарного фильтра ("BETWEEN").
+/*! Конструктор для бинарного фильтра ("BETWEEN"). */
 QstField::QstField(const QString &name,
 				   const QstValue &value1,
 				   const QstValue &value2,
@@ -122,7 +168,7 @@ QstField::QstField(const QString &name,
 	_values.append(value2);
 }
 
-// Конструктор для параметра процедуры.
+/*! Конструктор для параметра процедуры. */
 QstField::QstField(const QstValue &value,
 				   const FieldPurposes purposes) // Игнорируется.
 	:
@@ -137,7 +183,7 @@ QstField::QstField(const QstValue &value,
 	_values.append(value);
 }
 
-// Конструктор для ORDER BY и GROUP BY.
+/*! Конструктор для ORDER BY и GROUP BY. */
 QstField::QstField(const QString &name,
 				   const FieldPurposes purposes)
 	   :
@@ -151,16 +197,19 @@ QstField::QstField(const QString &name,
 {
 }
 
+/*! Возвращает имя поля. */
 QString QstField::name() const
 {
 	return _name;
 }
 
+/*! Устанавливает имя поля. */
 void QstField::setName(const QString &name)
 {
 	_name = name;
 }
 
+/*! Устанавливает, видимое ли поле (FieldVisible или FieldInvisible). */
 void QstField::setVisible(const bool &visible)
 {
 	if (visible)
@@ -169,56 +218,67 @@ void QstField::setVisible(const bool &visible)
 		_visibility = FieldInvisible;
 }
 
+/*! Возвращает видимость поля. */
 FieldVisibility QstField::visibility() const
 {
 	return _visibility;
 }
 
+/*! Устанавливает видимость поля. */
 void QstField::setVisibility(const FieldVisibility &visibility)
 {
 	_visibility = visibility;
 }
 
+/*! Возвращает название колонки. */
 QString QstField::columnTitle() const
 {
 	return _columnTitle;
 }
 
+/*! Устанавливает название колонки. */
 void QstField::setColumnTitle(const QString &title)
 {
 	_columnTitle = title;
 }
 
+/*! Возвращает ширину колонки. */
 int QstField::columnWidth() const
 {
 	return _columnWidth;
 }
 
+/*! Устанавливает ширину колонки. */
 void QstField::setColumnWidth(const int &width)
 {
 	_columnWidth = width;
 }
 
+/*! Возвращает ориентацию колонки. */
 Qt::Orientation QstField::orientation() const
 {
 	return _orientation;
 }
 
+/*! Устанавливает ориентацию колонки. */
 void QstField::setOrientation(const Qt::Orientation &orientation)
 {
 	_orientation = orientation;
 }
 
+/*! Возвращает назначения поля. */
 FieldPurposes	QstField::purposes() const
 {
 	return _purposes;
 }
 
+/*! Возвращает роль поля. */
 FieldRole	QstField::role() const
 {
 	return _role;
 }
 
+/*! Возвращает значение поля. */
 QstValue QstField::value(const BinaryValueOrder &order) const
 {
 #ifdef QT_DEBUG
@@ -228,9 +288,10 @@ QstValue QstField::value(const BinaryValueOrder &order) const
 #endif
 #endif
 
-return _values.value((int)order, QstValue());
+	return _values.value((int)order, QstValue());
 }
 
+/*! Устанавливает значение поля. */
 void QstField::setValue(const QstValue & val, const BinaryValueOrder &order)
 {
 	if (_values.size() < (int)order)
@@ -239,36 +300,46 @@ void QstField::setValue(const QstValue & val, const BinaryValueOrder &order)
 	_values[(int)order] = val;
 }
 
+/*! Возвращает true, если значение поля установлено.
+
+	Для бинарного фильтра BETWEEN может быть два значения.
+	order указывает, наличие какого значения проверяется. */
 bool QstField::hasValue(const BinaryValueOrder &order) const
 {
 	return ((int)order) < _values.size();
 }
 
+/*! Возвращает true, если поле - бинарный фильтр BETWEEN. */
 bool QstField::isBinaryFilter() const
 {
 	return	hasValue(OrderSecond);
 }
 
+/*! Возвращает true, если видимость поля - FieldVisible. */
 bool QstField::isVisible() const
 {
 	return _visibility == FieldVisible;
 }
 
+/*! Возвращает true, если видимость поля - FieldInvisible. */
 bool QstField::isInvisible() const
 {
 	return _visibility == FieldInvisible;
 }
 
+/*! Возвращает true, если видимость поля - VisibilityNone. */
 bool QstField::isNoneVisibility() const
 {
 	return _visibility == VisibilityNone;
 }
 
+/*! Возвращает true, если видимость поля - RolePrimaryKey или RoleParentKey. */
 bool QstField::isService() const
 {
 	return (_role == RolePrimaryKey || _role == RoleParentKey);
 }
 
+/*! Возвращает true, если все значения валидны. */
 bool QstField::isValuesValid() const
 {
 	if (_values.empty())
@@ -280,12 +351,16 @@ bool QstField::isValuesValid() const
 return true;
 }
 
+/*! Возвращает false в следующих случаях:
+	- имя поля пустое и все значения инвалидны;
+	- если назначение поля входит в PurposeValued_Mask и все значения инвалидны;
+	- если назначение поля входитв PurposeHasFieldName_Mask и имя поля пустое. */
 bool QstField::isValid() const
 {
 	if (_name.isEmpty() && !isValuesValid())
 		return false;
 
-	if ((_purposes & PurposeAllValued_Mask) && !isValuesValid())
+	if ((_purposes & PurposeValued_Mask) && !isValuesValid())
 		return false;
 
 	if ((_purposes & PurposeHasFieldName_Mask) && _name.isEmpty())
