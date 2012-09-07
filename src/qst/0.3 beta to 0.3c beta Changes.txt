@@ -1,0 +1,19 @@
+- Добавлен тип (SqlValue.h):
+  typedef QMap<QString, SqlValue>		SqlValuesMap
+  
+  
+- Добавлены функции
+
+void AbstractModelHandler::setValuesMap(const SqlValuesMap &valMap)
+и
+SqlValuesMap AbstractModelHandler::valuesMap() const.
+
+Действие аналогично функциям 
+
+void	 AbstractModelHandler::setValue(const QString &valueName,
+								 const SqlValue &value = SqlValue())
+и
+SqlValue AbstractModelHandler::value(const QString &valueName,
+						   const SqlValue &defaultValue = SqlValue()) const
+								 
+соответственно, только для карты значений.
