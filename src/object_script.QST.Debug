@@ -26,6 +26,7 @@ INPUT(
 ./debug\testhandler.o
 ./debug\mainwindow.o
 ./debug\qstif.o
+./debug\qstconnectionsettings.o
 ./debug\moc_qsttreequerymodel.o
 ./debug\moc_ut_qstvalue.o
 ./debug\moc_ut_qstquerygenerator.o

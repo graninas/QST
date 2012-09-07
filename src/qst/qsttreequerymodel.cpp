@@ -1,5 +1,5 @@
 /****************************************************************************
-** QST 0.4.2a beta
+** QST 0.4.2a rc
 ** Copyright (C) 2010 Granin A.S.
 ** Contact: Granin A.S. (graninas@gmail.com)
 **
@@ -88,6 +88,8 @@ void QstTreeQueryModel::setQuery(const QSqlQuery & query)
 void QstTreeQueryModel::setQuery(const QString& query, const QSqlDatabase &db)
 {
 	_query = QSqlQuery(query, db);
+
+	_lastError = _query.lastError();
 
 	Q_ASSERT(_query.isActive());
 
@@ -263,6 +265,12 @@ void QstTreeQueryModel::fetchMore ( const QModelIndex & parent)
 {
 	// Do nothing
 	return;
+}
+
+/*! Возвращает последнюю ошибку, возникшую при выполнении запроса. */
+QSqlError QstTreeQueryModel::lastError() const
+{
+	return _lastError;
 }
 
 void QstTreeQueryModel::_createTree()

@@ -1,9 +1,9 @@
 /****************************************************************************
-** QST 0.3c beta
+** QST 0.4.2a rc
 ** Copyright (C) 2010 Granin A.S.
 ** Contact: Granin A.S. (graninas@gmail.com)
 **
-** This file is part of the Sql module of the QsT SQL Tools.
+** This file is part of the QsT SQL Tools.
 **
 ** GNU Lesser General Public License Usage
 ** Alternatively, this file may be used under the terms of the GNU Lesser
@@ -14,7 +14,7 @@
 ** will be met: http://www.gnu.org/licenses/lgpl.html.
 **
 ** GNU General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU
+** Alternatively, thi file may be used under the terms of the GNU
 ** General Public License version 3.0 as published by the Free Software
 ** Foundation and appearing in the file LICENSE.GPL3 included in the
 ** packaging of this file.  Please review the following information to

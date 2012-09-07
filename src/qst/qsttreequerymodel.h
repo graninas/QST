@@ -1,5 +1,5 @@
 /****************************************************************************
-** QST 0.4.2a beta
+** QST 0.4.2a rc
 ** Copyright (C) 2010 Granin A.S.
 ** Contact: Granin A.S. (graninas@gmail.com)
 **
@@ -32,6 +32,7 @@
 
 #include <QAbstractItemModel>
 #include <QSqlQuery>
+#include <QSqlError>
 
 #include "qsttreeitem.h"
 
@@ -70,7 +71,10 @@ public:
 	virtual bool canFetchMore ( const QModelIndex & parent = QModelIndex() ) const;
 	virtual void fetchMore ( const QModelIndex & parent = QModelIndex() );
 
+	virtual QSqlError lastError() const;
+
 private:
+	QSqlError	_lastError;
 	QstTreeItem *_root;
 	QSqlQuery _query;
 

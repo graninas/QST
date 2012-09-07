@@ -31,7 +31,8 @@ SOURCES += main.cpp \
     test/ut_qstabstractmodelhandler.cpp \
     test/testhandler.cpp \
     mainwindow.cpp \
-    qst/qstif.cpp
+    qst/qstif.cpp \
+    qst/qstconnectionsettings.cpp
 HEADERS += qst/qstvalue.h \
     qst/qstabstractmodelhandler.h \
     qst/qstglobal.h \
@@ -58,5 +59,6 @@ HEADERS += qst/qstvalue.h \
     test/ut_qstabstractmodelhandler.h \
     test/testhandler.h \
     mainwindow.h \
-    qst/qstif.h
+    qst/qstif.h \
+    qst/qstconnectionsettings.h
 FORMS += mainwindow.ui

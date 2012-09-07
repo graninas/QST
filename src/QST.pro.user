@@ -79,50 +79,51 @@
    <value key="ProjectExplorer.BuildConfiguration.DisplayName" type="QString">Debug</value>
    <valuelist key="abstractProcess.Environment" type="QVariantList">
     <value type="QString">ALLUSERSPROFILE=C:\Documents and Settings\All Users</value>
-    <value type="QString">APPDATA=C:\Documents and Settings\Admin\Application Data</value>
+    <value type="QString">APPDATA=C:\Documents and Settings\gas\Application Data</value>
     <value type="QString">CLIENTNAME=Console</value>
     <value type="QString">COMMONPROGRAMFILES=C:\Program Files\Common Files</value>
-    <value type="QString">COMPUTERNAME=HOMECOMP</value>
+    <value type="QString">COMPUTERNAME=GRANIN</value>
     <value type="QString">COMSPEC=C:\WINDOWS\system32\cmd.exe</value>
     <value type="QString">FP_NO_HOST_CHECK=NO</value>
     <value type="QString">HOMEDRIVE=C:</value>
-    <value type="QString">HOMEPATH=\Documents and Settings\Admin</value>
-    <value type="QString">INCLUDE=D:\Qt\4.6.1\include\;D:\Qt\NCReport\2.4.1.mingw\include</value>
-    <value type="QString">LIB=D:\Qt\4.6.1\lib\</value>
-    <value type="QString">LOGONSERVER=\\HOMECOMP</value>
-    <value type="QString">MINGW=D:\Qt\MinGW\MinGW 3.81</value>
+    <value type="QString">HOMEPATH=\Documents and Settings\gas</value>
+    <value type="QString">LOGONSERVER=\\LOCTELECOM</value>
+    <value type="QString">MINGW=D:\Qt\MinGW\MinGW3.81</value>
     <value type="QString">NCREPORT=D:\Qt\NCReport\2.4.1.mingw</value>
     <value type="QString">NUMBER_OF_PROCESSORS=2</value>
     <value type="QString">OS=Windows_NT</value>
-    <value type="QString">PATH=D:\Qt\MinGW\MinGW 3.81\bin;D:\Qt\4.6.1\bin;C:\PROGRA~1\Borland\CBUILD~1\Bin;C:\PROGRA~1\Borland\CBUILD~1\Projects\Bpl;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\Program Files\ATI Technologies\ATI.ACE\;C:\Program Files\TortoiseSVN\bin;D:\Qt\4.6.1\bin\;D:\Qt\MinGW\MinGW 3.81\bin\;C:\Program Files\Microsoft SQL Server\80\Tools\BINN;C:\WINDOWS\System32;C:\Program Files\doxygen\bin;C:\Program Files\Autodesk\Backburner\;C:\Program Files\Common Files\Autodesk Shared\</value>
+    <value type="QString">PATH=D:\Qt\MinGW\MinGW3.81\bin;D:\Qt\4.7.0-beta2\bin;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;D:\Qt\4.7.0-beta2/bin;D:\Qt\MinGW\MinGW3.81/bin;C:\Program Files\Microsoft SQL Server\80\Tools\BINN;D:\Qt\NCReport\2.4.1.mingw\bin;D:\Qt\Qwt\qwt-5.2.0\lib;D:\Qt\Qwt\qwt-5.2.0\designer\plugins\designer;C:\Program Files\doxygen\bin;c:\Program Files\PostgreSQL\8.4\\bin;C:\Program Files\VisualSVN Server\bin\;C:\Program Files\Common Files\Acronis\SnapAPI\;C:\Program Files\Notepad2 4.0\;C:\Program Files\TortoiseSVN\bin;C:\Program Files\Nmap</value>
     <value type="QString">PATHEXT=.COM;.EXE;.BAT;.CMD;.VBS;.VBE;.JS;.JSE;.WSF;.WSH</value>
+    <value type="QString">POSTGRESQL=c:\Program Files\PostgreSQL\8.4\</value>
     <value type="QString">PROCESSOR_ARCHITECTURE=x86</value>
-    <value type="QString">PROCESSOR_IDENTIFIER=x86 Family 15 Model 4 Stepping 9, GenuineIntel</value>
-    <value type="QString">PROCESSOR_LEVEL=15</value>
-    <value type="QString">PROCESSOR_REVISION=0409</value>
+    <value type="QString">PROCESSOR_IDENTIFIER=x86 Family 6 Model 23 Stepping 6, GenuineIntel</value>
+    <value type="QString">PROCESSOR_LEVEL=6</value>
+    <value type="QString">PROCESSOR_REVISION=1706</value>
     <value type="QString">PROGRAMFILES=C:\Program Files</value>
     <value type="QString">QMAKESPEC=win32-g++</value>
-    <value type="QString">QTDIR=D:/Qt/4.6.1</value>
+    <value type="QString">QTDIR=D:/Qt/4.7.0-beta2</value>
+    <value type="QString">QWT=D:\Qt\Qwt\qwt-5.2.0</value>
     <value type="QString">SESSIONNAME=Console</value>
     <value type="QString">SYSTEMDRIVE=C:</value>
     <value type="QString">SYSTEMROOT=C:\WINDOWS</value>
-    <value type="QString">TEMP=C:\DOCUME~1\Admin\LOCALS~1\Temp</value>
-    <value type="QString">TMP=C:\DOCUME~1\Admin\LOCALS~1\Temp</value>
-    <value type="QString">USERDOMAIN=HOMECOMP</value>
-    <value type="QString">USERNAME=GAS</value>
-    <value type="QString">USERPROFILE=C:\Documents and Settings\Admin</value>
+    <value type="QString">TEMP=C:\DOCUME~1\gas\LOCALS~1\Temp</value>
+    <value type="QString">TMP=C:\DOCUME~1\gas\LOCALS~1\Temp</value>
+    <value type="QString">USERDNSDOMAIN=LOCTELECOMSERV</value>
+    <value type="QString">USERDOMAIN=LOCTELECOMSERV</value>
+    <value type="QString">USERNAME=gas</value>
+    <value type="QString">USERPROFILE=C:\Documents and Settings\gas</value>
     <value type="QString">VISUALSVN_SERVER=C:\Program Files\VisualSVN Server\</value>
     <value type="QString">WINDIR=C:\WINDOWS</value>
    </valuelist>
    <valuelist key="abstractProcess.arguments" type="QVariantList">
-    <value type="QString">J:/GAS/Devel/QST 0.4.2 beta/src/QST.pro</value>
+    <value type="QString">K:/GAS/Devel/QST 0.4.2a rc/src/QST.pro</value>
     <value type="QString">-spec</value>
     <value type="QString">win32-g++</value>
     <value type="QString">-r</value>
    </valuelist>
-   <value key="abstractProcess.command" type="QString">d:/qt/4.6.1/bin//qmake.exe</value>
+   <value key="abstractProcess.command" type="QString">d:/qt/4.7.0-beta2/bin/qmake.exe</value>
    <value key="abstractProcess.enabled" type="bool">true</value>
-   <value key="abstractProcess.workingDirectory" type="QString">J:/GAS/Devel/QST 0.4.2 beta/src</value>
+   <value key="abstractProcess.workingDirectory" type="QString">K:/GAS/Devel/QST 0.4.2a rc/src</value>
   </valuemap>
  </data>
  <data>
@@ -131,38 +132,39 @@
    <value key="ProjectExplorer.BuildConfiguration.DisplayName" type="QString">Debug</value>
    <valuelist key="abstractProcess.Environment" type="QVariantList">
     <value type="QString">ALLUSERSPROFILE=C:\Documents and Settings\All Users</value>
-    <value type="QString">APPDATA=C:\Documents and Settings\Admin\Application Data</value>
+    <value type="QString">APPDATA=C:\Documents and Settings\gas\Application Data</value>
     <value type="QString">CLIENTNAME=Console</value>
     <value type="QString">COMMONPROGRAMFILES=C:\Program Files\Common Files</value>
-    <value type="QString">COMPUTERNAME=HOMECOMP</value>
+    <value type="QString">COMPUTERNAME=GRANIN</value>
     <value type="QString">COMSPEC=C:\WINDOWS\system32\cmd.exe</value>
     <value type="QString">FP_NO_HOST_CHECK=NO</value>
     <value type="QString">HOMEDRIVE=C:</value>
-    <value type="QString">HOMEPATH=\Documents and Settings\Admin</value>
-    <value type="QString">INCLUDE=D:\Qt\4.6.1\include\;D:\Qt\NCReport\2.4.1.mingw\include</value>
-    <value type="QString">LIB=D:\Qt\4.6.1\lib\</value>
-    <value type="QString">LOGONSERVER=\\HOMECOMP</value>
-    <value type="QString">MINGW=D:\Qt\MinGW\MinGW 3.81</value>
+    <value type="QString">HOMEPATH=\Documents and Settings\gas</value>
+    <value type="QString">LOGONSERVER=\\LOCTELECOM</value>
+    <value type="QString">MINGW=D:\Qt\MinGW\MinGW3.81</value>
     <value type="QString">NCREPORT=D:\Qt\NCReport\2.4.1.mingw</value>
     <value type="QString">NUMBER_OF_PROCESSORS=2</value>
     <value type="QString">OS=Windows_NT</value>
-    <value type="QString">PATH=D:\Qt\MinGW\MinGW 3.81\bin;D:\Qt\4.6.1\bin;C:\PROGRA~1\Borland\CBUILD~1\Bin;C:\PROGRA~1\Borland\CBUILD~1\Projects\Bpl;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\Program Files\ATI Technologies\ATI.ACE\;C:\Program Files\TortoiseSVN\bin;D:\Qt\4.6.1\bin\;D:\Qt\MinGW\MinGW 3.81\bin\;C:\Program Files\Microsoft SQL Server\80\Tools\BINN;C:\WINDOWS\System32;C:\Program Files\doxygen\bin;C:\Program Files\Autodesk\Backburner\;C:\Program Files\Common Files\Autodesk Shared\</value>
+    <value type="QString">PATH=D:\Qt\MinGW\MinGW3.81\bin;D:\Qt\4.7.0-beta2\bin;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;D:\Qt\4.7.0-beta2/bin;D:\Qt\MinGW\MinGW3.81/bin;C:\Program Files\Microsoft SQL Server\80\Tools\BINN;D:\Qt\NCReport\2.4.1.mingw\bin;D:\Qt\Qwt\qwt-5.2.0\lib;D:\Qt\Qwt\qwt-5.2.0\designer\plugins\designer;C:\Program Files\doxygen\bin;c:\Program Files\PostgreSQL\8.4\\bin;C:\Program Files\VisualSVN Server\bin\;C:\Program Files\Common Files\Acronis\SnapAPI\;C:\Program Files\Notepad2 4.0\;C:\Program Files\TortoiseSVN\bin;C:\Program Files\Nmap</value>
     <value type="QString">PATHEXT=.COM;.EXE;.BAT;.CMD;.VBS;.VBE;.JS;.JSE;.WSF;.WSH</value>
+    <value type="QString">POSTGRESQL=c:\Program Files\PostgreSQL\8.4\</value>
     <value type="QString">PROCESSOR_ARCHITECTURE=x86</value>
-    <value type="QString">PROCESSOR_IDENTIFIER=x86 Family 15 Model 4 Stepping 9, GenuineIntel</value>
-    <value type="QString">PROCESSOR_LEVEL=15</value>
-    <value type="QString">PROCESSOR_REVISION=0409</value>
+    <value type="QString">PROCESSOR_IDENTIFIER=x86 Family 6 Model 23 Stepping 6, GenuineIntel</value>
+    <value type="QString">PROCESSOR_LEVEL=6</value>
+    <value type="QString">PROCESSOR_REVISION=1706</value>
     <value type="QString">PROGRAMFILES=C:\Program Files</value>
     <value type="QString">QMAKESPEC=win32-g++</value>
-    <value type="QString">QTDIR=D:/Qt/4.6.1</value>
+    <value type="QString">QTDIR=D:/Qt/4.7.0-beta2</value>
+    <value type="QString">QWT=D:\Qt\Qwt\qwt-5.2.0</value>
     <value type="QString">SESSIONNAME=Console</value>
     <value type="QString">SYSTEMDRIVE=C:</value>
     <value type="QString">SYSTEMROOT=C:\WINDOWS</value>
-    <value type="QString">TEMP=C:\DOCUME~1\Admin\LOCALS~1\Temp</value>
-    <value type="QString">TMP=C:\DOCUME~1\Admin\LOCALS~1\Temp</value>
-    <value type="QString">USERDOMAIN=HOMECOMP</value>
-    <value type="QString">USERNAME=GAS</value>
-    <value type="QString">USERPROFILE=C:\Documents and Settings\Admin</value>
+    <value type="QString">TEMP=C:\DOCUME~1\gas\LOCALS~1\Temp</value>
+    <value type="QString">TMP=C:\DOCUME~1\gas\LOCALS~1\Temp</value>
+    <value type="QString">USERDNSDOMAIN=LOCTELECOMSERV</value>
+    <value type="QString">USERDOMAIN=LOCTELECOMSERV</value>
+    <value type="QString">USERNAME=gas</value>
+    <value type="QString">USERPROFILE=C:\Documents and Settings\gas</value>
     <value type="QString">VISUALSVN_SERVER=C:\Program Files\VisualSVN Server\</value>
     <value type="QString">WINDIR=C:\WINDOWS</value>
    </valuelist>
@@ -170,9 +172,9 @@
    <valuelist key="abstractProcess.arguments" type="QVariantList">
     <value type="QString">-w</value>
    </valuelist>
-   <value key="abstractProcess.command" type="QString">D:/Qt/MinGW/MinGW 3.81/bin/mingw32-make.exe</value>
+   <value key="abstractProcess.command" type="QString">D:/Qt/MinGW/MinGW3.81/bin/mingw32-make.exe</value>
    <value key="abstractProcess.enabled" type="bool">true</value>
-   <value key="abstractProcess.workingDirectory" type="QString">J:/GAS/Devel/QST 0.4.2 beta/src</value>
+   <value key="abstractProcess.workingDirectory" type="QString">K:/GAS/Devel/QST 0.4.2a rc/src</value>
   </valuemap>
  </data>
  <data>
@@ -272,7 +274,7 @@
     <value type="QString">WINDIR=C:\WINDOWS</value>
    </valuelist>
    <valuelist key="abstractProcess.arguments" type="QVariantList">
-    <value type="QString">K:/GAS/Devel/QST 0.4.2a beta/src/QST.pro</value>
+    <value type="QString">K:/GAS/Devel/QST 0.4.2a rc/src/QST.pro</value>
     <value type="QString">-spec</value>
     <value type="QString">win32-g++</value>
     <value type="QString">-r</value>
@@ -280,7 +282,7 @@
    </valuelist>
    <value key="abstractProcess.command" type="QString">d:/qt/4.6.1/bin/qmake.exe</value>
    <value key="abstractProcess.enabled" type="bool">true</value>
-   <value key="abstractProcess.workingDirectory" type="QString">K:/GAS/Devel/QST 0.4.2a beta/src</value>
+   <value key="abstractProcess.workingDirectory" type="QString">K:/GAS/Devel/QST 0.4.2a rc/src</value>
   </valuemap>
  </data>
  <data>
@@ -330,7 +332,7 @@
    </valuelist>
    <value key="abstractProcess.command" type="QString">D:/Qt/MinGW/MinGW3.81/bin/mingw32-make.exe</value>
    <value key="abstractProcess.enabled" type="bool">true</value>
-   <value key="abstractProcess.workingDirectory" type="QString">K:/GAS/Devel/QST 0.4.2a beta/src</value>
+   <value key="abstractProcess.workingDirectory" type="QString">K:/GAS/Devel/QST 0.4.2a rc/src</value>
   </valuemap>
  </data>
  <data>

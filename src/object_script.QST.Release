@@ -26,6 +26,7 @@ INPUT(
 ./release\testhandler.o
 ./release\mainwindow.o
 ./release\qstif.o
+./release\qstconnectionsettings.o
 ./release\moc_qsttreequerymodel.o
 ./release\moc_ut_qstvalue.o
 ./release\moc_ut_qstquerygenerator.o

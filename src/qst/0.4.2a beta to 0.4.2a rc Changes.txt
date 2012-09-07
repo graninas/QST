@@ -1,0 +1,13 @@
+0.4.2a beta to 0.4.2a rc Changes
+
+- Добавлен возврат по ошибке из функции QstAbstractModelHandler::selectToMap(), а так же вывод QSqlError в отладочную консоль.
+- Добавлена функция ModelType QstAbstractModelHandler::modelType().
+- Добавлен класс QstConnectionSettings - настройки подключения.
+- Добавлена функция QSqlError QstTreeQueryModel::lastError().
+- Обновлена документация.
+
+-= QstDBConnection =-
+- Класс переработан.
+- Настрйки подключения можно передавать в QstDBConnection внутри QstConnectionSettings.
+- Добавлена функция QSqlError QstDBConnection::lastError().
+- Добавлена функция QstConnectionSettings QstDBConnection::connectionSettings(const QString &connectionName).

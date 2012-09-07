@@ -1,5 +1,5 @@
 /****************************************************************************
-** QST 0.4.2a beta
+** QST 0.4.2a rc
 ** Copyright (C) 2010 Granin A.S.
 ** Contact: Granin A.S. (graninas@gmail.com)
 **

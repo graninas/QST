@@ -1,5 +1,5 @@
 /****************************************************************************
-** QST 0.4.2a beta
+** QST 0.4.2a rc
 ** Copyright (C) 2010 Granin A.S.
 ** Contact: Granin A.S. (graninas@gmail.com)
 **
@@ -539,6 +539,11 @@ bool QstAbstractModelHandler::isLoaded() const
 		_valuesMap.clear();
 	}
 
+	/*! Возвращает тип текущей загруженной модели. */
+	ModelType QstAbstractModelHandler::modelType() const
+	{
+		return _modelType;
+	}
 
 	/*! Возвращает данные поля fieldName в строке row.
 
@@ -795,6 +800,8 @@ bool QstAbstractModelHandler::isLoaded() const
 		Q_ASSERT(model != NULL);
 		Q_ASSERT(db.isOpen());
 
+		_modelType = modelType;
+
 		QstBatch btch = this->_selector(queryNumber);
 
 		QstQueryDescriptor queryDescriptor(btch, QuerySelect, queryNumber);
@@ -985,6 +992,12 @@ bool QstAbstractModelHandler::isLoaded() const
 
 		queryModel.setQuery(gen.query(), db);
 
+		QSqlError err = queryModel.lastError();
+		if (err.isValid())
+		{
+			qDebug() << err.text();
+			return QVariant();
+		}
 		QModelIndex index = queryModel.index(row, column, QModelIndex());
 
 		if (index.isValid())
@@ -1012,6 +1025,12 @@ bool QstAbstractModelHandler::isLoaded() const
 		QstPlainQueryModel	queryModel;
 		queryModel.setQuery(gen.query(), db);
 
+		QSqlError err = queryModel.lastError();
+		if (err.isValid())
+		{
+			qDebug() << err.text();
+			return QVariantMap();
+		}
 		QstBatch btch = descriptor.batch();
 
 		QVariantMap		resMap;

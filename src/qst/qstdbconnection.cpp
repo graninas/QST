@@ -1,5 +1,5 @@
 /****************************************************************************
-** QST 0.4.2a beta
+** QST 0.4.2a rc
 ** Copyright (C) 2010 Granin A.S.
 ** Contact: Granin A.S. (graninas@gmail.com)
 **
@@ -47,44 +47,45 @@ namespace Qst
 */
 
 /*! Конструктор по умолчанию. */
-QstDBConnection::QstDBConnection(const QString &driverName):
-	_hostName(""),
-	_port(-1),
-	_databaseName(""),
-	_userName(""),
-	_password(""),
+QstDBConnection::QstDBConnection(const QString &driverName)
+	:
 	_driverName(driverName)
 {
 }
 
 /*! Устанавливает имя хоста. */
-void QstDBConnection::setHostName(const QString& hostName)
+void QstDBConnection::setHostName(const QString& host,
+								  const QString &connectionName)
 {
-	_hostName = hostName;
+	_connectionSettingsMap[connectionName].setHostName(host);
 }
 
 /*! Устанавливает порт. */
-void QstDBConnection::setPort(const int& port)
+void QstDBConnection::setPort(const int &port,
+							  const QString &connectionName)
 {
-	_port = port;
-}
-
-/*! Устанавливает имя пользователя (login). */
-void QstDBConnection::setUserName(const QString& userName)
-{
-	_userName = userName;
+	_connectionSettingsMap[connectionName].setPort(port);
 }
 
 /*! Устанавливает название базы данных или источника данных ODBC. */
-void QstDBConnection::setDatabaseName(const QString& databaseName)
+void QstDBConnection::setDatabaseName(const QString &databaseName,
+									  const QString &connectionName)
 {
-	_databaseName = databaseName;
+	_connectionSettingsMap[connectionName].setDatabaseName(databaseName);
+}
+
+/*! Устанавливает имя пользователя (login). */
+void QstDBConnection::setUserName(const QString &userName,
+								  const QString &connectionName)
+{
+	_connectionSettingsMap[connectionName].setUserName(userName);
 }
 
 /*! Устанавливает пароль. */
-void QstDBConnection::setPassword(const QString& password)
+void QstDBConnection::setPassword(const QString &password,
+								  const QString &connectionName)
 {
-	_password = password;
+	_connectionSettingsMap[connectionName].setPassword(password);
 }
 
 /*! Устанавливает драйвер подключения к СУБД. */
@@ -102,14 +103,17 @@ bool QstDBConnection::isOpen() const
 /*! Устанавливает имя пользователя и пароль, подключает к базе данных.
 
 	Возвращает true, если подключение было успешным. */
-bool QstDBConnection::connect(const QString& userName,
-							  const QString& password,
+bool QstDBConnection::connect(const QString &userName,
+							  const QString &password,
 							  const QString &connectionName)
 {
-	if (!test(_hostName, _databaseName, userName, password)) return false;
+	if (!test(_connectionSettingsMap[connectionName].hostName(),
+			  _connectionSettingsMap[connectionName].databaseName(),
+			  userName,
+			  password)) return false;
 
-	_userName = userName;
-	_password = password;
+	setUserName(userName, connectionName);
+	setPassword(password, connectionName);
 
 	return _open(connectionName);
 }
@@ -118,19 +122,19 @@ bool QstDBConnection::connect(const QString& userName,
   к базе данных.
 
   Возвращает true, если подключение было успешным. */
-bool QstDBConnection::connect(const QString& hostName,
-							  const QString& databaseName,
-							  const QString& userName,
-							  const QString& password,
+bool QstDBConnection::connect(const QString &hostName,
+							  const QString &databaseName,
+							  const QString &userName,
+							  const QString &password,
 							  const QString &connectionName)
 {
 	if (!test(hostName, databaseName, userName, password)) return false;
 
-	_hostName = hostName;
-	_port = -1;
-	_databaseName   = databaseName;
-	_userName = userName;
-	_password = password;
+	setHostName(hostName, connectionName);
+	setPort(-1, connectionName);
+	setDatabaseName(databaseName, connectionName);
+	setUserName(userName, connectionName);
+	setPassword(password, connectionName);
 
 	return _open(connectionName);
 }
@@ -139,37 +143,38 @@ bool QstDBConnection::connect(const QString& hostName,
 	Подключает к базе данных.
 
   Возвращает true, если подключение было успешным. */
-bool QstDBConnection::connect(const QString& hostName,
+bool QstDBConnection::connect(const QString &hostName,
 							  const int &port,
-							  const QString& databaseName,
-							  const QString& userName,
-							  const QString& password,
+							  const QString &databaseName,
+							  const QString &userName,
+							  const QString &password,
 							  const QString &connectionName)
 {
 	if (!test(hostName, databaseName, userName, password)) return false;
 
-	_hostName = hostName;
-	_port = port;
-	_databaseName   = databaseName;
-	_userName = userName;
-	_password = password;
+	setHostName(hostName, connectionName);
+	setPort(port, connectionName);
+	setDatabaseName(databaseName, connectionName);
+	setUserName(userName, connectionName);
+	setPassword(password, connectionName);
 
 	return _open(connectionName);
 }
 
-/*! Тестирует переданные параметры на подключение к базе данных.
-
-	После тестирования подключение, в общем случае, удаляется.
-
-	Порт не устанавливается.
-
-	Возвращает true, если подключение было успешным.*/
-bool QstDBConnection::test(const QString& hostName,
-						   const QString& databaseName,
-						   const QString& userName,
-						   const QString& password)
+bool QstDBConnection::connect(const QstConnectionSettings &connectionSettings,
+							  const QString &connectionName)
 {
-	return test(hostName, -1, databaseName, userName, password);
+	_connectionSettingsMap[connectionName] = connectionSettings;
+
+	if (!test(connectionName)) return false;
+
+	return _open(connectionName);
+}
+
+/*! Возвращает последнюю ошибку QSqlDatabase. */
+QSqlError QstDBConnection::lastError() const
+{
+	return _db.lastError();
 }
 
 /*! Тестирует переданные параметры на подключение к базе данных.
@@ -177,11 +182,11 @@ bool QstDBConnection::test(const QString& hostName,
 	После тестирования подключение, в общем случае, удаляется.
 
 	Возвращает true, если подключение было успешным.*/
-bool QstDBConnection::test(const QString& hostName,
+bool QstDBConnection::test(const QString &hostName,
 						   const int &port,
-						   const QString& databaseName,
-						   const QString& userName,
-						   const QString& password)
+						   const QString &databaseName,
+						   const QString &userName,
+						   const QString &password)
 {
 	QSqlDatabase testDB;
 
@@ -224,14 +229,42 @@ QSqlDatabase::removeDatabase("TestConnection");
 return true;
 }
 
+/*! Тестирует переданные параметры на подключение к базе данных.
+
+	После тестирования подключение, в общем случае, удаляется.
+
+	Порт не устанавливается.
+
+	Возвращает true, если подключение было успешным.*/
+bool QstDBConnection::test(const QString &hostName,
+						   const QString &databaseName,
+						   const QString &userName,
+						   const QString &password)
+{
+	return test(hostName, -1, databaseName, userName, password);
+}
+
+bool QstDBConnection::test(const QstConnectionSettings &connectionSettings)
+{
+	return test(connectionSettings.hostName(),
+				connectionSettings.port(),
+				connectionSettings.databaseName(),
+				connectionSettings.userName(),
+				connectionSettings.password());
+}
+
 /*! Тестирует установленные ранее параметры на подключение к БД.
 
 	После тестирования подключение, в общем случае, удаляется.
 
 	Возвращает true, если подключение было успешным.*/
-bool QstDBConnection::test()
+bool QstDBConnection::test(const QString &connectionName)
 {
-	return test(_hostName, _databaseName, _userName, _password);
+	return test(_connectionSettingsMap[connectionName].hostName(),
+				_connectionSettingsMap[connectionName].port(),
+				_connectionSettingsMap[connectionName].databaseName(),
+				_connectionSettingsMap[connectionName].userName(),
+				_connectionSettingsMap[connectionName].password());
 }
 
 /*! Открывает подключение к БД с ранее установленными параметрами. */
@@ -250,35 +283,46 @@ void QstDBConnection::close()
 
 	Возвращает true, если если подключение было успешным. */
 bool QstDBConnection::addConnection(const QString &connectionName,
-								 const QString& hostName,
-								 const QString& databaseName,
-								 const QString& userName,
-								 const QString& password)
+									const QString &hostName,
+									const int &port,
+									const QString &databaseName,
+									const QString &userName,
+									const QString &password)
 {
-	_hostName = hostName;
-	_port = -1;
-	_databaseName   = databaseName;
-	_userName = userName;
-	_password = password;
+	setHostName(hostName, connectionName);
+	setPort(port, connectionName);
+	setDatabaseName(databaseName, connectionName);
+	setUserName(userName, connectionName);
+	setPassword(password, connectionName);
 
 	return _open(connectionName);
+}
+
+bool QstDBConnection::addConnection(const QString &connectionName,
+									const QstConnectionSettings &connectionSettings)
+{
+	return addConnection(connectionName,
+						 connectionSettings.hostName(),
+						 connectionSettings.port(),
+						 connectionSettings.databaseName(),
+						 connectionSettings.userName(),
+						 connectionSettings.password());
 }
 
 /*! Добавляет и открывает новое подключение к БД.
 
 	Возвращает true, если если подключение было успешным. */
 bool QstDBConnection::addConnection(const QString &connectionName,
-								 const QString& hostName,
-								 const int &port,
-								 const QString& databaseName,
-								 const QString& userName,
-								 const QString& password)
+									const QString &hostName,
+									const QString &databaseName,
+									const QString &userName,
+									const QString &password)
 {
-	_hostName = hostName;
-	_port = port;
-	_databaseName   = databaseName;
-	_userName = userName;
-	_password = password;
+	setHostName(hostName, connectionName);
+	setPort(-1, connectionName);
+	setDatabaseName(databaseName, connectionName);
+	setUserName(userName, connectionName);
+	setPassword(password, connectionName);
 
 	return _open(connectionName);
 }
@@ -293,6 +337,14 @@ QSqlDatabase & QstDBConnection::rdb()
 QSqlDatabase * QstDBConnection::pdb()
 {
 	return &_db;
+}
+
+/*! Возвращает настройки подключения по имени подключения. */
+QstConnectionSettings QstDBConnection::connectionSettings(const QString &connectionName) const
+{
+	if (_connectionSettingsMap.contains(connectionName))
+		return _connectionSettingsMap[connectionName];
+return QstConnectionSettings();
 }
 
 
@@ -314,20 +366,20 @@ bool QstDBConnection::_open(const QString &connectionName)
 	qDebug() << "Driver has QuerySize? " << _db.driver()->hasFeature(QSqlDriver::QuerySize);
 #endif
 
-	_db.setHostName(_hostName);
-	_db.setDatabaseName(_databaseName);
-	_db.setUserName(_userName);
-	_db.setPassword(_password);
+	_db.setHostName(_connectionSettingsMap[connectionName].hostName());
+	_db.setDatabaseName(_connectionSettingsMap[connectionName].databaseName());
+	_db.setUserName(_connectionSettingsMap[connectionName].userName());
+	_db.setPassword(_connectionSettingsMap[connectionName].password());
 
-	if (_port != -1)
-		_db.setPort(_port);
+	if (_connectionSettingsMap[connectionName].port() != -1)
+		_db.setPort(_connectionSettingsMap[connectionName].port());
 
 #ifdef QT_DEBUG
-	qDebug() << "hostName:" << _hostName;
-	qDebug() << "port:" << _port;
-	qDebug() << "databaseName:" << _databaseName;
-	qDebug() << "userName:" << _userName;
-	qDebug() << "password:" << _password;
+	qDebug() << "hostName:" << _connectionSettingsMap[connectionName].hostName();
+	qDebug() << "port:" << _connectionSettingsMap[connectionName].port();
+	qDebug() << "databaseName:" << _connectionSettingsMap[connectionName].databaseName();
+	qDebug() << "userName:" << _connectionSettingsMap[connectionName].userName();
+	qDebug() << "password:" << _connectionSettingsMap[connectionName].password();
 #endif
 
 	_db.open();

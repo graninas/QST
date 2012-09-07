@@ -1,5 +1,5 @@
 /****************************************************************************
-** QST 0.4.2a beta
+** QST 0.4.2a rc
 ** Copyright (C) 2010 Granin A.S.
 ** Contact: Granin A.S. (graninas@gmail.com)
 **
@@ -96,5 +96,6 @@ void ut_QstAbstractModelHandler::generateQuery1_data()
 	QTest::newRow("3")	<< 	m_h3	<<  QString("SELECT Name, ID FROM table1 WHERE OrderDate BETWEEN convert(datetime, '10.10.2010', 104) AND convert(datetime, '16.10.2010', 104)");
 	QTest::newRow("4")	<< 	m_h4	<<  QString("SELECT Name, ID FROM table1");
 }
+
 
 } // End of namespace QstTest

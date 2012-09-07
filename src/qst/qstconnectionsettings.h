@@ -26,31 +26,54 @@
 **
 ****************************************************************************/
 
-#ifndef QSTDEFAULTITEMNAMEEXTRACTOR_H
-#define QSTDEFAULTITEMNAMEEXTRACTOR_H
+#ifndef QSTCONNECTIONSETTINGS_H
+#define QSTCONNECTIONSETTINGS_H
 
-#include "qstabstractitemnameextractor.h"
+#include <QString>
 
 namespace Qst
 {
 
-
-class QstDefaultItemNameExtractor : public QstAbstractItemNameExtractor
+class QstConnectionSettings
 {
-public:
-    QstDefaultItemNameExtractor();
-	QstDefaultItemNameExtractor(const QString &str);
-
-	QString extractItemName() const;
-	QString extractItemName(const QString &str) const;
-
 private:
 
-	QString _str;
+	QString _hostName;
+	int		_port;
+	QString _databaseName;
+	QString _userName;
+	QString _password;
 
-	QString _getFromBrackets(const QString &str) const;
+public:
+	QstConnectionSettings();
+	QstConnectionSettings(const QString &hostName,
+						  const int &port,
+						  const QString &databaseName,
+						  const QString &userName,
+						  const QString &password);
+
+	QstConnectionSettings(const QString &hostName,
+						  const QString &databaseName,
+						  const QString &userName,
+						  const QString &password);
+
+	QString hostName() const;
+	int		port() const;
+	QString databaseName() const;
+	QString userName() const;
+	QString password() const;
+
+	void setHostName(const QString &hostName);
+	void setPort(const int &port);
+	void setDatabaseName(const QString &databaseName);
+	void setUserName(const QString &userName);
+	void setPassword(const QString &password);
+
+	bool isNull() const;
 };
+
 
 }
 
-#endif // QSTDEFAULTITEMNAMEEXTRACTOR_H
+#endif // QSTCONNECTIONSETTINGS_H
+
